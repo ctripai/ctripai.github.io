@@ -103,6 +103,30 @@
             height: auto;
             border-radius: 5px;
         }
+
+        /* 移动端射击按钮 */
+        .shoot-btn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(231, 76, 60, 0.8);
+            border: 2px solid #fff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .shoot-btn {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
@@ -119,6 +143,8 @@
             <button class="restart-btn" id="restartBtn">重新开始</button>
         </div>
     </div>
+    <!-- 移动端射击按钮 -->
+    <button class="shoot-btn" id="shootBtn">发射</button>
 
     <script>
         // 等待DOM完全加载后执行
@@ -132,6 +158,7 @@
             const scoreElement = document.getElementById('score');
             const lifeElement = document.getElementById('life');
             const finalScoreElement = document.getElementById('finalScore');
+            const shootBtn = document.getElementById('shootBtn');
 
             // 游戏参数
             let gameRunning = false;
@@ -139,6 +166,12 @@
             let life = 3;
             let explosions = []; // 爆炸效果数组
             let lastShotTime = 0;
+            // 射速优化：降低手机端射击间隔（从200ms改为100ms）
+            const SHOOT_INTERVAL_PC = 200;
+            const SHOOT_INTERVAL_MOBILE = 100;
+            // 自动射击开关（移动端默认开启）
+            let autoShoot = false;
+            let lastAutoShootTime = 0;
 
             // 玩家飞机（纯几何图形定义）
             let player = {
@@ -154,6 +187,8 @@
             let enemies = [];
             let enemySpawnTimer = 0;
             let keys = {};
+            // 判断是否为移动端
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
             // 监听键盘事件
             document.addEventListener('keydown', (e) => {
@@ -177,6 +212,25 @@
                 player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
             });
 
+            // 移动端射击按钮事件
+            shootBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                shoot();
+            });
+            // 移动端点击画布射击
+            canvas.addEventListener('touchstart', (e) => {
+                if (!gameRunning) return;
+                // 防止和移动事件冲突，只响应非移动的点击
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const clickX = touch.clientX - rect.left;
+                const clickY = touch.clientY - rect.top;
+                // 简单判断：点击位置不在玩家飞机区域则视为射击
+                if (!(clickX > player.x && clickX < player.x + player.width && clickY > player.y && clickY < player.y + player.height)) {
+                    shoot();
+                }
+            });
+
             // 绘制玩家飞机（纯三角形+矩形，蓝色战斗机样式）
             function drawPlayer() {
                 ctx.save();
@@ -198,17 +252,36 @@
                 ctx.restore();
             }
 
-            // 生成子弹（圆形子弹）
+            // 生成子弹（优化射速，区分PC和移动端）
             function shoot() {
-                if (Date.now() - lastShotTime > 200) { // 射速限制
+                const now = Date.now();
+                const interval = isMobile ? SHOOT_INTERVAL_MOBILE : SHOOT_INTERVAL_PC;
+                if (now - lastShotTime > interval) { // 移动端射速翻倍
                     bullets.push({
                         x: player.x + player.width / 2 - 8,
                         y: player.y,
                         width: 16,
                         height: 24,
-                        speed: 8
+                        speed: 12, // 子弹速度提升（从8改为12）
                     });
-                    lastShotTime = Date.now();
+                    // 双发子弹（移动端额外增加一发，提升火力）
+                    if (isMobile) {
+                        bullets.push({
+                            x: player.x + player.width / 2 - 25,
+                            y: player.y + 10,
+                            width: 16,
+                            height: 24,
+                            speed: 12,
+                        });
+                        bullets.push({
+                            x: player.x + player.width / 2 + 9,
+                            y: player.y + 10,
+                            width: 16,
+                            height: 24,
+                            speed: 12,
+                        });
+                    }
+                    lastShotTime = now;
                 }
             }
 
@@ -403,9 +476,12 @@
                 explosions = [];
                 enemySpawnTimer = 0;
                 lastShotTime = 0;
+                lastAutoShootTime = 0;
                 scoreElement.textContent = score;
                 lifeElement.textContent = life;
                 gameOver.style.display = 'none';
+                // 移动端默认开启自动射击
+                autoShoot = isMobile;
             }
 
             // 绘制星空背景
@@ -445,9 +521,18 @@
                     player.y += player.speed;
                 }
 
-                // 射击控制
+                // PC端射击控制
                 if (keys['Space'] || keys[' ']) {
                     shoot();
+                }
+
+                // 移动端自动射击
+                if (autoShoot && gameRunning) {
+                    const now = Date.now();
+                    if (now - lastAutoShootTime > SHOOT_INTERVAL_MOBILE) {
+                        shoot();
+                        lastAutoShootTime = now;
+                    }
                 }
 
                 // 边界检测
@@ -478,6 +563,8 @@
             function initGame() {
                 drawBackground();
                 drawPlayer();
+                // 移动端默认开启自动射击
+                autoShoot = isMobile;
             }
 
             // 事件监听
