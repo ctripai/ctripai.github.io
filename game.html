@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>飞机大战H5</title>
     <style>
         * {
@@ -16,14 +16,18 @@
             padding: 0;
             font-family: Arial, sans-serif;
             color: #fff;
-            /* 太空主题背景图（全屏覆盖，固定不滚动） */
-            background: url('https://picsum.photos/id/1023/1920/1080') center/cover fixed no-repeat;
+            /* 太空主题背景图（全屏覆盖，无重复） */
+            background: url('https://picsum.photos/id/1023/1920/1080') center/cover no-repeat;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
+            /* 消除body的默认边距 */
+            position: fixed;
+            top: 0;
+            left: 0;
         }
 
-        /* 首屏开始界面 */
+        /* 首屏开始界面（全屏无黑边） */
         .start-screen {
             position: fixed;
             top: 0;
@@ -37,7 +41,7 @@
             justify-content: center;
             z-index: 100;
             text-align: center;
-            padding: 20px;
+            padding: 0 20px;
         }
 
         .start-screen h1 {
@@ -73,46 +77,58 @@
             box-shadow: 0 0 30px rgba(0, 255, 204, 0.8);
         }
 
-        /* 游戏容器（移动端全屏） */
+        /* 游戏容器（完全全屏，无内边距） */
         .game-container {
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100vw;
             height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            padding: 20px 15px; /* 左右内边距，避免内容贴边 */
             background: rgba(0, 0, 0, 0.7);
+            /* 消除所有内边距，避免黑边 */
+            padding: 0;
+            margin: 0;
         }
 
-        /* 分数生命信息（内缩，增加内边距） */
+        /* 分数生命信息（内缩且不占额外高度，带背景框） */
         .game-info {
             display: flex;
             justify-content: space-between;
-            width: 100%;
+            width: 90%;
             max-width: 600px;
-            margin-bottom: 10px;
+            margin: 10px auto;
             font-size: 1.2rem;
             text-shadow: 0 0 5px #00ff00;
             background: rgba(0, 0, 0, 0.8);
-            padding: 10px 20px;
+            padding: 8px 20px;
             border-radius: 10px;
             border: 1px solid #00ff00;
+            /* 固定在顶部，不影响画布高度 */
+            position: relative;
+            z-index: 10;
         }
 
-        /* 画布样式（自适应全屏） */
+        /* 画布样式（完全占满剩余屏幕，无黑边） */
         canvas {
             border: 2px solid #33ff33;
             background: #0a0a0a;
-            border-radius: 5px;
-            width: 100%;
-            height: calc(100vh - 100px);
-            max-width: 600px;
-            object-fit: contain;
+            border-radius: 0;
+            width: 100vw;
+            height: calc(100vh - 50px);
+            max-width: none;
+            max-height: none;
+            object-fit: cover;
+            /* 消除画布的margin和padding */
+            margin: 0;
+            padding: 0;
+            display: block;
         }
 
-        /* 游戏结束弹窗 */
+        /* 游戏结束弹窗（居中显示，确保可见） */
         .game-over {
             position: absolute;
             top: 50%;
@@ -126,6 +142,7 @@
             border: 2px solid #ff4444;
             width: 90%;
             max-width: 400px;
+            z-index: 20;
         }
 
         .game-over h2 {
@@ -153,12 +170,12 @@
             transform: scale(1.05);
         }
 
-        /* 隐藏所有不需要的按钮 */
+        /* 隐藏无用元素 */
         .start-btn, .shoot-btn {
             display: none !important;
         }
 
-        /* 响应式调整 */
+        /* 响应式调整（适配各种手机尺寸） */
         @media (max-width: 768px) {
             .start-screen h1 {
                 font-size: 2rem;
@@ -166,11 +183,33 @@
 
             .game-info {
                 font-size: 1rem;
-                padding: 8px 15px;
+                padding: 6px 15px;
+                margin: 5px auto;
+                width: 95%;
             }
 
             canvas {
-                height: calc(100vh - 80px);
+                height: calc(100vh - 40px);
+                border-width: 1px;
+            }
+        }
+
+        /* 适配刘海屏/全面屏 */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+            }
+
+            .game-container {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+
+            .game-info {
+                margin-top: env(safe-area-inset-top) + 5px;
             }
         }
     </style>
@@ -185,13 +224,13 @@
         <button class="main-start-btn" id="mainStartBtn">开始游戏</button>
     </div>
 
-    <!-- 游戏容器 -->
+    <!-- 游戏容器（完全全屏） -->
     <div class="game-container">
         <div class="game-info">
             <span>分数: <span id="score">0</span></span>
             <span>生命: <span id="life">3</span></span>
         </div>
-        <canvas id="gameCanvas" width="400" height="600"></canvas>
+        <canvas id="gameCanvas" width="device-width" height="device-height"></canvas>
         <div class="game-over" id="gameOver">
             <h2>游戏结束</h2>
             <p>最终分数: <span id="finalScore">0</span></p>
@@ -214,6 +253,16 @@
             const finalScoreElement = document.getElementById('finalScore');
             const historyScoreElement = document.getElementById('historyScore');
 
+            // 适配画布尺寸到实际屏幕大小（关键：消除黑边）
+            function resizeCanvas() {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                // 重置玩家飞机位置
+                player.x = canvas.width / 2 - 25;
+                player.y = canvas.height - 80;
+            }
+
             // 从本地存储获取历史最高分
             let historyScore = localStorage.getItem('planeGameHighScore') || 0;
             historyScoreElement.textContent = historyScore;
@@ -225,7 +274,7 @@
             let explosions = [];
             let lastShotTime = 0;
             const SHOOT_INTERVAL_PC = 200;
-            const SHOOT_INTERVAL_MOBILE = 50; // 移动端射速再提升
+            const SHOOT_INTERVAL_MOBILE = 50;
             let autoShoot = false;
             let lastAutoShootTime = 0;
 
@@ -244,6 +293,11 @@
             let enemySpawnTimer = 0;
             let keys = {};
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            // 监听窗口大小变化，实时适配画布
+            window.addEventListener('resize', resizeCanvas);
+            // 初始调整画布尺寸
+            resizeCanvas();
 
             // 监听键盘事件
             document.addEventListener('keydown', (e) => {
@@ -520,7 +574,7 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 // 绘制星星（不同大小和亮度）
-                for (let i = 0; i < 150; i++) {
+                for (let i = 0; i < 200; i++) {
                     const x = Math.random() * canvas.width;
                     const y = Math.random() * canvas.height;
                     const size = Math.random() * 3 + 1;
@@ -532,7 +586,7 @@
                 // 绘制星云
                 ctx.fillStyle = 'rgba(100, 100, 255, 0.1)';
                 ctx.beginPath();
-                ctx.arc(canvas.width/2, canvas.height/2, 150, 0, Math.PI * 2);
+                ctx.arc(canvas.width/2, canvas.height/2, 200, 0, Math.PI * 2);
                 ctx.fill();
             }
 
