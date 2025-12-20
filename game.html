@@ -364,24 +364,24 @@
         </div>
     </div>
 
-    <!-- 音频元素 -->
+    <!-- 替换为稳定的音频资源 -->
     <audio id="bgMusic" loop preload="auto">
-        <source src="https://assets.mixkit.co/music/preview/mixkit-arcade-game-loop-240.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-tech-house-vibes-130.mp3" type="audio/mpeg">
     </audio>
     <audio id="shootSound" preload="auto">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-retro-video-game-shoot-1660.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-retro-video-game-shot-1660.mp3" type="audio/mpeg">
     </audio>
     <audio id="explosionSound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-in-the-air-2798.mp3" type="audio/mpeg">
     </audio>
     <audio id="propSound" preload="auto">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-video-game-power-up-2069.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-211.mp3" type="audio/mpeg">
     </audio>
     <audio id="levelUpSound" preload="auto">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-video-game-level-up-2060.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-video-game-level-up-2059.mp3" type="audio/mpeg">
     </audio>
     <audio id="gameOverSound" preload="auto">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-player-losing-or-failing-2042.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-video-game-defeat-2042.mp3" type="audio/mpeg">
     </audio>
 
     <script>
@@ -415,6 +415,8 @@
 
             // 音效开关状态
             let soundOn = true;
+            // 记录用户是否有过交互（解决浏览器自动播放策略）
+            let userInteracted = false;
 
             // 初始化音频音量
             bgMusic.volume = 0.3;
@@ -424,35 +426,93 @@
             levelUpSound.volume = 0.5;
             gameOverSound.volume = 0.5;
 
+            // 监听用户交互（点击/触摸）
+            document.addEventListener('click', () => {
+                userInteracted = true;
+            }, { once: true });
+            document.addEventListener('touchstart', () => {
+                userInteracted = true;
+            }, { once: true });
+
+            // 音频加载检测
+            const audioElements = [bgMusic, shootSound, explosionSound, propSound, levelUpSound, gameOverSound];
+            audioElements.forEach(audio => {
+                audio.addEventListener('error', (e) => {
+                    console.error(`音频加载失败: ${audio.src}，错误类型: ${e.target.error.code}`);
+                });
+                audio.load();
+            });
+
             // 音效开关点击事件
             soundToggle.addEventListener('click', () => {
                 soundOn = !soundOn;
                 soundToggle.textContent = soundOn ? '🔊' : '🔇';
                 
                 // 控制背景音乐播放/暂停
-                if (soundOn) {
-                    if (gameRunning) bgMusic.play();
+                if (soundOn && gameRunning && userInteracted) {
+                    bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
                 } else {
                     bgMusic.pause();
                 }
             });
 
-            // 播放音效函数
+            // 播放音效函数（修复连续播放和用户交互问题）
             function playSound(audio) {
-                if (soundOn) {
-                    // 重置播放位置，支持连续播放
-                    audio.currentTime = 0;
-                    audio.play().catch(e => console.log('音频播放失败:', e));
+                if (!soundOn || !userInteracted) return;
+
+                try {
+                    // 克隆音频元素解决连续播放问题
+                    const audioClone = audio.cloneNode();
+                    audioClone.volume = audio.volume;
+                    audioClone.play().then(() => {
+                        // 播放完成后移除克隆元素
+                        audioClone.addEventListener('ended', () => {
+                            audioClone.remove();
+                        });
+                    }).catch(e => {
+                        console.log('音效播放失败:', e);
+                    });
+                } catch (err) {
+                    console.error('音效播放异常:', err);
                 }
             }
+
+            // Web Audio API 兜底（音频资源失效时使用）
+            let audioContext;
+            function initAudioContext() {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Web Audio API 不受支持:', e);
+                }
+            }
+
+            function playBeep(freq = 440, duration = 100) {
+                if (!soundOn || !userInteracted || !audioContext) return;
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = freq;
+                gainNode.gain.value = 0.1;
+                oscillator.start();
+                setTimeout(() => {
+                    oscillator.stop();
+                }, duration);
+            }
+
+            // 初始化音频上下文
+            initAudioContext();
 
             // 适配画布尺寸
             function resizeCanvas() {
                 const rect = canvas.getBoundingClientRect();
                 canvas.width = rect.width;
                 canvas.height = rect.height;
-                player.x = canvas.width / 2 - 25;
-                player.y = canvas.height - 80;
+                if (player) {
+                    player.x = canvas.width / 2 - 25;
+                    player.y = canvas.height - 80;
+                }
             }
 
             // 本地存储
@@ -700,7 +760,8 @@
                             penetrate: penetrateBullet
                         });
                         wingman.lastShotTime = Date.now();
-                        playSound(shootSound); // 僚机射击音效
+                        playSound(shootSound);
+                        playBeep(700, 30); // 兜底音效
                     }
 
                     // 僚机碰撞检测
@@ -714,6 +775,7 @@
                             wingmen.splice(index, 1);
                             addExplosion(wingman.x + wingman.width/2, wingman.y + wingman.height/2, wingman.width);
                             playSound(explosionSound);
+                            playBeep(200, 100); // 兜底音效
                         }
                     });
                 });
@@ -726,6 +788,7 @@
                 if (now - lastShotTime > interval) {
                     // 播放射击音效
                     playSound(shootSound);
+                    playBeep(880, 50); // 兜底音效
 
                     // 超级子弹效果
                     const bulletSize = player.superBullet ? 24 : 16;
@@ -833,7 +896,8 @@
                     maxLevel = Math.max(maxLevel, level);
                     levelElement.textContent = level;
                     showPropTip(canvas.width/2, canvas.height/2, `等级提升！${level}级`);
-                    playSound(levelUpSound); // 等级提升音效
+                    playSound(levelUpSound);
+                    playBeep(1000, 100); // 兜底音效
                 }
 
                 // BOSS生成（每5级生成一次）
@@ -1031,7 +1095,8 @@
                         player.y < prop.y + prop.height &&
                         player.y + player.height > prop.y
                     ) {
-                        playSound(propSound); // 道具拾取音效
+                        playSound(propSound);
+                        playBeep(600, 50); // 兜底音效
                         applyPropEffect(prop.type.effect);
                         props.splice(index, 1);
                     }
@@ -1064,7 +1129,8 @@
                         showPropTip(player.x, player.y, '清屏！');
                         score += scoreDouble ? 100 : 50;
                         scoreElement.textContent = score;
-                        playSound(explosionSound); // 清屏爆炸音效
+                        playSound(explosionSound);
+                        playBeep(300, 200); // 兜底音效
                         break;
                     case 'superBullet':
                         player.superBullet = true;
@@ -1137,7 +1203,8 @@
                     enemies = [];
                     enemyBullets = [];
                     showPropTip(canvas.width/2, canvas.height/2, '炸弹爆炸！');
-                    playSound(explosionSound); // 炸弹爆炸音效
+                    playSound(explosionSound);
+                    playBeep(200, 300); // 兜底音效
                 }
 
                 propsCount = propsInventory.length;
@@ -1168,7 +1235,8 @@
                     maxFrames: 6,
                     frameTimer: 0
                 });
-                playSound(explosionSound); // 爆炸音效
+                playSound(explosionSound);
+                playBeep(200, 100); // 兜底音效
             }
 
             function drawExplosions() {
@@ -1317,6 +1385,7 @@
                 bgMusic.pause();
                 // 播放游戏结束音效
                 playSound(gameOverSound);
+                playBeep(100, 500); // 兜底音效
 
                 // 更新本地存储
                 if (score > historyScore) {
@@ -1382,10 +1451,9 @@
                 // 更新难度配置
                 DIFFICULTY_CONFIG = getDifficultyConfig(selectedDifficulty);
 
-                // 开始背景音乐
-                if (soundOn) {
+                // 开始背景音乐（在用户交互后执行）
+                if (soundOn && userInteracted) {
                     bgMusic.currentTime = 0;
-                    bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
                 }
             }
 
@@ -1517,12 +1585,48 @@
                 startScreen.style.display = 'none';
                 gameRunning = true;
                 resetGame();
+                
+                // 强制触发用户交互标记
+                userInteracted = true;
+                
+                // 激活音频上下文（解决Chrome暂停策略）
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                // 播放背景音乐（多次尝试）
+                if (soundOn) {
+                    bgMusic.play().then(() => {
+                        console.log('背景音乐播放成功');
+                    }).catch(e => {
+                        console.log('第一次播放失败，重试:', e);
+                        // 克隆后播放
+                        const bgMusicClone = bgMusic.cloneNode();
+                        bgMusicClone.loop = true;
+                        bgMusicClone.play().then(() => {
+                            console.log('克隆后背景音乐播放成功');
+                            document.body.replaceChild(bgMusicClone, bgMusic);
+                            bgMusic = bgMusicClone;
+                        }).catch(e2 => {
+                            console.log('克隆后仍失败:', e2);
+                            showPropTip(canvas.width/2, canvas.height/2, '音频已通过Web Audio API兜底');
+                        });
+                    });
+                }
+                
                 gameLoop();
             });
 
             restartBtn.addEventListener('click', () => {
                 resetGame();
                 gameRunning = true;
+                
+                // 重新播放背景音乐
+                if (soundOn && userInteracted) {
+                    bgMusic.currentTime = 0;
+                    bgMusic.play().catch(e => console.log('背景音乐重新播放失败:', e));
+                }
+                
                 gameLoop();
             });
 
