@@ -86,6 +86,24 @@
             box-shadow: 0 0 10px #00ffcc;
         }
 
+        .sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #00ffcc;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ffcc;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 101;
+        }
+
         .main-start-btn {
             padding: 15px 40px;
             font-size: 1.5rem;
@@ -280,6 +298,12 @@
                 height: 40px;
                 font-size: 1rem;
             }
+
+            .sound-toggle {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
         }
 
         /* 适配刘海屏/全面屏 */
@@ -305,6 +329,7 @@
 <body>
     <!-- 首屏开始界面 -->
     <div class="start-screen" id="startScreen">
+        <div class="sound-toggle" id="soundToggle">🔊</div>
         <h1>太空飞机大战</h1>
         <div class="history-score">
             历史最高分：<span id="historyScore">0</span>
@@ -339,6 +364,26 @@
         </div>
     </div>
 
+    <!-- 音频元素 -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="https://assets.mixkit.co/music/preview/mixkit-arcade-game-loop-240.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="shootSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-retro-video-game-shoot-1660.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="explosionSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-in-the-air-2798.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="propSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-video-game-power-up-2069.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="levelUpSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-video-game-level-up-2060.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="gameOverSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-player-losing-or-failing-2042.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
         // 等待DOM完全加载后执行
         document.addEventListener('DOMContentLoaded', function() {
@@ -358,6 +403,48 @@
             const propsCountElement = document.getElementById('propsCount');
             const propUseBtn = document.getElementById('propUseBtn');
             const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+            const soundToggle = document.getElementById('soundToggle');
+
+            // 音频元素
+            const bgMusic = document.getElementById('bgMusic');
+            const shootSound = document.getElementById('shootSound');
+            const explosionSound = document.getElementById('explosionSound');
+            const propSound = document.getElementById('propSound');
+            const levelUpSound = document.getElementById('levelUpSound');
+            const gameOverSound = document.getElementById('gameOverSound');
+
+            // 音效开关状态
+            let soundOn = true;
+
+            // 初始化音频音量
+            bgMusic.volume = 0.3;
+            shootSound.volume = 0.2;
+            explosionSound.volume = 0.4;
+            propSound.volume = 0.5;
+            levelUpSound.volume = 0.5;
+            gameOverSound.volume = 0.5;
+
+            // 音效开关点击事件
+            soundToggle.addEventListener('click', () => {
+                soundOn = !soundOn;
+                soundToggle.textContent = soundOn ? '🔊' : '🔇';
+                
+                // 控制背景音乐播放/暂停
+                if (soundOn) {
+                    if (gameRunning) bgMusic.play();
+                } else {
+                    bgMusic.pause();
+                }
+            });
+
+            // 播放音效函数
+            function playSound(audio) {
+                if (soundOn) {
+                    // 重置播放位置，支持连续播放
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.log('音频播放失败:', e));
+                }
+            }
 
             // 适配画布尺寸
             function resizeCanvas() {
@@ -613,6 +700,7 @@
                             penetrate: penetrateBullet
                         });
                         wingman.lastShotTime = Date.now();
+                        playSound(shootSound); // 僚机射击音效
                     }
 
                     // 僚机碰撞检测
@@ -625,6 +713,7 @@
                         ) {
                             wingmen.splice(index, 1);
                             addExplosion(wingman.x + wingman.width/2, wingman.y + wingman.height/2, wingman.width);
+                            playSound(explosionSound);
                         }
                     });
                 });
@@ -635,6 +724,9 @@
                 const now = Date.now();
                 const interval = isMobile ? SHOOT_INTERVAL_MOBILE : SHOOT_INTERVAL_PC;
                 if (now - lastShotTime > interval) {
+                    // 播放射击音效
+                    playSound(shootSound);
+
                     // 超级子弹效果
                     const bulletSize = player.superBullet ? 24 : 16;
                     const bulletSpeed = player.superBullet ? 20 : 15;
@@ -741,6 +833,7 @@
                     maxLevel = Math.max(maxLevel, level);
                     levelElement.textContent = level;
                     showPropTip(canvas.width/2, canvas.height/2, `等级提升！${level}级`);
+                    playSound(levelUpSound); // 等级提升音效
                 }
 
                 // BOSS生成（每5级生成一次）
@@ -938,6 +1031,7 @@
                         player.y < prop.y + prop.height &&
                         player.y + player.height > prop.y
                     ) {
+                        playSound(propSound); // 道具拾取音效
                         applyPropEffect(prop.type.effect);
                         props.splice(index, 1);
                     }
@@ -970,6 +1064,7 @@
                         showPropTip(player.x, player.y, '清屏！');
                         score += scoreDouble ? 100 : 50;
                         scoreElement.textContent = score;
+                        playSound(explosionSound); // 清屏爆炸音效
                         break;
                     case 'superBullet':
                         player.superBullet = true;
@@ -1042,6 +1137,7 @@
                     enemies = [];
                     enemyBullets = [];
                     showPropTip(canvas.width/2, canvas.height/2, '炸弹爆炸！');
+                    playSound(explosionSound); // 炸弹爆炸音效
                 }
 
                 propsCount = propsInventory.length;
@@ -1072,6 +1168,7 @@
                     maxFrames: 6,
                     frameTimer: 0
                 });
+                playSound(explosionSound); // 爆炸音效
             }
 
             function drawExplosions() {
@@ -1216,6 +1313,11 @@
                 finalScoreElement.textContent = score;
                 finalLevelElement.textContent = maxLevel;
 
+                // 停止背景音乐
+                bgMusic.pause();
+                // 播放游戏结束音效
+                playSound(gameOverSound);
+
                 // 更新本地存储
                 if (score > historyScore) {
                     historyScore = score;
@@ -1279,6 +1381,12 @@
                 autoShoot = isMobile;
                 // 更新难度配置
                 DIFFICULTY_CONFIG = getDifficultyConfig(selectedDifficulty);
+
+                // 开始背景音乐
+                if (soundOn) {
+                    bgMusic.currentTime = 0;
+                    bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
+                }
             }
 
             // 绘制太空背景
