@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>我的作品集</title>
+  <title>熊志文的作品集</title>
   <style>
     /* 全局重置与基础样式 */
     * {
@@ -224,10 +224,16 @@
     .about-text {
       font-size: 1.1rem;
       color: #4a5568;
+      line-height: 1.8;
     }
 
     .about-text p {
       margin-bottom: 1.5rem;
+    }
+
+    .about-text .highlight {
+      color: #667eea;
+      font-weight: 600;
     }
 
     .about-image img {
@@ -414,7 +420,7 @@
   <!-- 导航栏 -->
   <nav class="navbar">
     <div class="nav-container">
-      <a href="#" class="nav-logo">MyPortfolio</a>
+      <a href="#" class="nav-logo">Zhiwen's Portfolio</a>
       <div class="nav-toggle" id="mobile-menu">
         <span class="bar"></span>
         <span class="bar"></span>
@@ -432,8 +438,8 @@
   <!-- 首页横幅 -->
   <section id="home" class="hero">
     <div class="hero-content">
-      <h1>你好，我是小明</h1>
-      <p>前端开发者 & UI设计师</p>
+      <h1>你好，我是熊志文</h1>
+      <p>资深软件工程师 & 全栈技术架构师</p>
       <button class="cta-btn">查看作品</button>
     </div>
   </section>
@@ -444,8 +450,10 @@
       <h2 class="section-title">关于我</h2>
       <div class="about-content">
         <div class="about-text">
-          <p>我是一名热爱设计与开发的前端工程师，拥有3年以上的项目经验。我喜欢创造美观、实用且响应迅速的网页应用。</p>
-          <p>技术栈：HTML, CSS, JavaScript, React, Figma</p>
+          <p>我是一名拥有<span class="highlight">13年+</span>一线开发与架构设计经验的资深软件工程师，专注于企业级应用研发、分布式系统构建与技术团队管理，曾服务于互联网、金融、智能制造等多个行业的头部企业。</p>
+          <p>擅长从0到1搭建高可用、高并发的技术体系，主导过多个千万级用户产品的架构设计与落地，注重技术与业务的深度融合，始终以解决实际业务问题为核心目标。</p>
+          <p><strong>核心技术栈：</strong>Java/Go/Python、微服务架构、云原生技术（K8s/Docker）、前端全栈（React/Vue）、大数据与中间件（Redis/MQ/Elasticsearch）</p>
+          <p>除了技术研发，我也热衷于技术分享与团队培养，坚信优秀的技术产品离不开高效的团队协作与持续的技术创新。</p>
         </div>
         <div class="about-image">
           <!-- 支持JS时使用LQIP和自定义懒加载 -->
@@ -453,13 +461,13 @@
             class="fade-in lqip-placeholder"
             style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22 viewBox=%220 0 300 300%22%3E%3Crect width=%22300%22 height=%22300%22 fill=%22%23e0e7ff%22/%3E%3Ccircle cx=%22150%22 cy=%22150%22 r=%22120%22 fill=%22%23c7d2fe%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E头像%3C/text%3E%3C/svg%3E')"
             data-src="https://picsum.photos/id/1005/300/300" 
-            alt="个人头像"
+            alt="熊志文个人头像"
           >
           <!-- 不支持JS时使用原生懒加载 -->
           <noscript>
             <img 
               src="https://picsum.photos/id/1005/300/300" 
-              alt="个人头像"
+              alt="熊志文个人头像"
               loading="lazy"
               style="width:100%;max-width:300px;border-radius:50%;box-shadow:0 10px 30px rgba(102, 126, 234, 0.2);"
             >
@@ -478,57 +486,57 @@
           <!-- 支持JS时使用LQIP和自定义懒加载 -->
           <img 
             class="fade-in lqip-placeholder"
-            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22 viewBox=%220 0 400 250%22%3E%3Crect width=%22400%22 height=%22250%22 fill=%22%23f0f4ff%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E电商网站%3C/text%3E%3C/svg%3E')"
+            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22 viewBox=%220 0 400 250%22%3E%3Crect width=%22400%22 height=%22250%22 fill=%22%23f0f4ff%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E微服务平台%3C/text%3E%3C/svg%3E')"
             data-src="https://picsum.photos/id/1/400/250" 
-            alt="电商网站设计"
+            alt="企业级微服务平台"
           >
           <!-- 不支持JS时使用原生懒加载 -->
           <noscript>
             <img 
               src="https://picsum.photos/id/1/400/250" 
-              alt="电商网站设计"
+              alt="企业级微服务平台"
               loading="lazy"
               style="width:100%;height:200px;object-fit:cover;"
             >
           </noscript>
-          <h3>电商网站设计</h3>
-          <p>使用 React 和 Tailwind CSS 构建的响应式电商平台。</p>
+          <h3>企业级微服务平台</h3>
+          <p>基于Spring Cloud Alibaba构建的分布式微服务架构，支撑日均千万级请求，已在3家大型企业落地。</p>
         </div>
         <div class="project-card">
           <img 
             class="fade-in lqip-placeholder"
-            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22 viewBox=%220 0 400 250%22%3E%3Crect width=%22400%22 height=%22250%22 fill=%22%23eef3ff%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E博客系统%3C/text%3E%3C/svg%3E')"
+            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22 viewBox=%220 0 400 250%22%3E%3Crect width=%22400%22 height=%22250%22 fill=%22%23eef3ff%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E大数据分析系统%3C/text%3E%3C/svg%3E')"
             data-src="https://picsum.photos/id/29/400/250" 
-            alt="博客系统"
+            alt="大数据分析平台"
           >
           <noscript>
             <img 
               src="https://picsum.photos/id/29/400/250" 
-              alt="博客系统"
+              alt="大数据分析平台"
               loading="lazy"
               style="width:100%;height:200px;object-fit:cover;"
             >
           </noscript>
-          <h3>博客系统</h3>
-          <p>Node.js + MongoDB 后端，搭配现代化前端界面。</p>
+          <h3>大数据分析平台</h3>
+          <p>基于Flink+Spark构建的实时数据处理系统，为金融行业提供实时风控与用户行为分析能力。</p>
         </div>
         <div class="project-card">
           <img 
             class="fade-in lqip-placeholder"
-            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22 viewBox=%220 0 400 250%22%3E%3Crect width=%22400%22 height=%22250%22 fill=%22%23e6eeff%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E移动App%3C/text%3E%3C/svg%3E')"
+            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22 viewBox=%220 0 400 250%22%3E%3Crect width=%22400%22 height=%22250%22 fill=%22%23e6eeff%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E云原生管理系统%3C/text%3E%3C/svg%3E')"
             data-src="https://picsum.photos/id/237/400/250" 
-            alt="移动App界面"
+            alt="云原生管理系统"
           >
           <noscript>
             <img 
               src="https://picsum.photos/id/237/400/250" 
-              alt="移动App界面"
+              alt="云原生管理系统"
               loading="lazy"
               style="width:100%;height:200px;object-fit:cover;"
             >
           </noscript>
-          <h3>移动App界面</h3>
-          <p>Figma 设计的健身追踪 App 界面原型。</p>
+          <h3>云原生管理系统</h3>
+          <p>基于Kubernetes的容器编排与资源管理平台，简化企业云原生转型流程，支持多集群统一管理。</p>
         </div>
       </div>
     </div>
@@ -549,7 +557,7 @@
 
   <!-- 页脚 -->
   <footer class="footer">
-    <p>&copy; 2025 小明的个人作品集. 版权所有.</p>
+    <p>&copy; 2025 熊志文的个人作品集. 版权所有.</p>
   </footer>
 
   <script>
