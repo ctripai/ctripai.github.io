@@ -537,6 +537,8 @@
                     spawnRate: { min: 5, max: 60 },
                     // 敌机速度的基础增长系数
                     enemySpeedFactor: 0.001,
+                    // 快速敌机速度系数单独配置
+                    fastEnemySpeedFactor: 0.0005,
                     // 敌机血量的基础增长系数
                     enemyHpFactor: 0.002,
                     // BOSS血量增长系数
@@ -558,6 +560,7 @@
                         return {
                             ...baseConfig,
                             enemySpeedFactor: 0.0015,
+                            fastEnemySpeedFactor: 0.00075,
                             enemyHpFactor: 0.0025,
                             bossHpFactor: 20,
                             bossBulletSpeedFactor: 0.06,
@@ -568,6 +571,7 @@
                         return {
                             ...baseConfig,
                             enemySpeedFactor: 0.002,
+                            fastEnemySpeedFactor: 0.001,
                             enemyHpFactor: 0.003,
                             bossHpFactor: 25,
                             bossBulletSpeedFactor: 0.07,
@@ -903,9 +907,14 @@
                 // BOSS生成（每5级生成一次）
                 if (level % 5 === 0 && !bossSpawned) {
                     const bossHp = ENEMY_TYPES.BOSS.hp + (level - 5) * DIFFICULTY_CONFIG.bossHpFactor;
+                    // 限制BOSS生成的X坐标在画布内
+                    const bossX = Math.max(
+                        ENEMY_TYPES.BOSS.size/2, 
+                        Math.min(canvas.width - ENEMY_TYPES.BOSS.size/2, canvas.width / 2 - 50)
+                    );
                     enemies.push({
                         type: ENEMY_TYPES.BOSS,
-                        x: canvas.width / 2 - 50,
+                        x: bossX, // 使用限制后的X坐标
                         y: 50,
                         width: ENEMY_TYPES.BOSS.size,
                         height: ENEMY_TYPES.BOSS.size,
@@ -933,7 +942,18 @@
 
                 // 敌机属性：随分数和等级平滑增长
                 const size = enemyType.size + Math.random() * 10;
-                const speed = enemyType.speed + score * DIFFICULTY_CONFIG.enemySpeedFactor + (level * 0.05);
+                // 为不同类型敌机设置速度上限
+                let speed;
+                if (enemyType === ENEMY_TYPES.FAST) {
+                    // 蓝色快速敌机：降低基础增长系数，设置速度上限
+                    speed = enemyType.speed + score * DIFFICULTY_CONFIG.fastEnemySpeedFactor + (level * 0.02);
+                    speed = Math.min(speed, 8); // 限制最大速度为8（可根据需求调整）
+                } else {
+                    // 其他敌机保持原有计算
+                    speed = enemyType.speed + score * DIFFICULTY_CONFIG.enemySpeedFactor + (level * 0.05);
+                    // 为其他敌机也设置合理上限
+                    speed = Math.min(speed, 6); // 普通和装甲敌机最大速度6
+                }
                 const hp = enemyType.hp + Math.floor(score * DIFFICULTY_CONFIG.enemyHpFactor + level * 0.1);
 
                 enemies.push({
@@ -987,8 +1007,13 @@
                                 });
                             }
                         }
-                        // BOSS移动
-                        enemy.x += Math.sin(Date.now() / 1000) * 2;
+                        // BOSS移动 - 修复出界问题
+                        const targetX = canvas.width / 2 + Math.sin(Date.now() / 1000) * 100;
+                        // 限制BOSS在画布内移动
+                        enemy.x = Math.max(
+                            0 + enemy.width/2, 
+                            Math.min(canvas.width - enemy.width/2, targetX)
+                        );
                     }
 
                     // 普通敌机移动
