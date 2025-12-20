@@ -1,138 +1,108 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 改变世界 | 探索未来</title>
-    <style>
-        /* CSS 样式开始 */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #0d0d1a; /* 深色背景增加科技感 */
-            color: #e0e0e0;
-            line-height: 1.6;
-            text-align: center;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: auto;
-            padding: 20px;
-        }
-
-        header {
-            padding: 60px 20px;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border-bottom: 3px solid #0f3460;
-        }
-
-        h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            color: #e94560; /* 突出色 */
-        }
-
-        p.subtitle {
-            font-size: 1.2em;
-            color: #bfbfbf;
-        }
-
-        .section {
-            padding: 40px 20px;
-        }
-
-        .section h2 {
-            font-size: 2em;
-            color: #53d8fb;
-            margin-bottom: 20px;
-        }
-
-        .features {
-            display: flex;
-            justify-content: space-around;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .feature-card {
-            background: #1a1a2e;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            flex: 1;
-            min-width: 200px;
-            transition: transform 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .feature-card h3 {
-            color: #e94560;
-        }
-
-        footer {
-            background-color: #0f3460;
-            padding: 20px 0;
-            font-size: 0.9em;
-            margin-top: 40px;
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2em;
-            }
-            .features {
-                flex-direction: column;
-            }
-        }
-        /* CSS 样式结束 */
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>我的作品集</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-    <header>
-        <div class="container">
-            <h1>人工智能 (AI) 改变世界</h1>
-            <p class="subtitle">探索 AI 如何塑造我们的未来和日常生活。</p>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-logo">MyPortfolio</a>
+      <div class="nav-toggle" id="mobile-menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="#home" class="nav-link">首页</a></li>
+        <li class="nav-item"><a href="#about" class="nav-link">关于我</a></li>
+        <li class="nav-item"><a href="#projects" class="nav-link">作品</a></li>
+        <li class="nav-item"><a href="#contact" class="nav-link">联系</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 首页横幅 -->
+  <section id="home" class="hero">
+    <div class="hero-content">
+      <h1>你好，我是小明</h1>
+      <p>前端开发者 & UI设计师</p>
+      <button class="cta-btn">查看作品</button>
+    </div>
+  </section>
+
+  <!-- 关于我 -->
+  <section id="about" class="about">
+    <div class="container">
+      <h2>关于我</h2>
+      <div class="about-content">
+        <div class="about-text">
+          <p>我是一名热爱设计与开发的前端工程师，拥有3年以上的项目经验。我喜欢创造美观、实用且响应迅速的网页应用。</p>
+          <p>技术栈：HTML, CSS, JavaScript, React, Figma</p>
         </div>
-    </header>
-
-    <div class="section container">
-        <h2>赋能未来</h2>
-        <p>人工智能不再是科幻小说中的概念，而是我们这个时代最具变革性的技术之一。从医疗诊断到自动驾驶，AI 正在以前所未有的方式提高效率、解决复杂问题。</p>
-    </div>
-
-    <div class="section container">
-        <h2>核心影响领域</h2>
-        <div class="features">
-            <div class="feature-card">
-                <h3>🩺 医疗健康</h3>
-                <p>AI 辅助诊断、药物研发加速和个性化治疗方案。</p>
-            </div>
-            <div class="feature-card">
-                <h3>🚗 交通出行</h3>
-                <p>自动驾驶技术和智能交通管理系统，让出行更安全高效。</p>
-            </div>
-            <div class="feature-card">
-                <h3>💡 智能生活</h3>
-                <p>智能家居、个性化推荐和日常任务自动化。</p>
-            </div>
+        <div class="about-image">
+          <img src="https://via.placeholder.com/300" alt="个人头像">
         </div>
+      </div>
     </div>
+  </section>
 
-    <div class="section container">
-        <h2>娱乐一下</h2>
-        <p>体验一下我们制作的简易 <a href="game.html" style="color: #53d8fb; text-decoration: none; font-weight: bold;">H5 飞机大战小游戏</a>！</p>
+  <!-- 作品展示 -->
+  <section id="projects" class="projects">
+    <div class="container">
+      <h2>我的作品</h2>
+      <div class="project-grid">
+        <div class="project-card">
+          <img src="https://via.placeholder.com/400x250" alt="项目1">
+          <h3>电商网站设计</h3>
+          <p>使用 React 和 Tailwind CSS 构建的响应式电商平台。</p>
+        </div>
+        <div class="project-card">
+          <img src="https://via.placeholder.com/400x250" alt="项目2">
+          <h3>博客系统</h3>
+          <p>Node.js + MongoDB 后端，搭配现代化前端界面。</p>
+        </div>
+        <div class="project-card">
+          <img src="https://via.placeholder.com/400x250" alt="项目3">
+          <h3>移动App界面</h3>
+          <p>Figma 设计的健身追踪 App 界面原型。</p>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <footer>
-        <p>&copy; 2025 AI 世界探索 | 您的 GitHub Pages 主页</p>
-    </footer>
+  <!-- 联系方式 -->
+  <section id="contact" class="contact">
+    <div class="container">
+      <h2>联系我</h2>
+      <form class="contact-form">
+        <input type="text" placeholder="你的名字" required />
+        <input type="email" placeholder="你的邮箱" required />
+        <textarea placeholder="消息内容" rows="5" required></textarea>
+        <button type="submit">发送消息</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <p>&copy; 2025 小明的个人作品集. 版权所有.</p>
+  </footer>
+
+  <script>
+    // 移动端菜单切换
+    const mobileMenu = document.getElementById('mobile-menu');
+    const navMenu = document.querySelector('.nav-menu');
+
+    mobileMenu.addEventListener('click', () => {
+      mobileMenu.classList.toggle('active');
+      navMenu.classList.toggle('active');
+    });
+  </script>
 
 </body>
 </html>
