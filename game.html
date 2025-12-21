@@ -530,15 +530,15 @@
                 });
             });
 
-            // 难度曲线配置（根据选择的难度调整系数）
+            // 难度曲线配置（根据选择的难度调整系数）- 修正了速度增长系数
             const getDifficultyConfig = (diff) => {
                 const baseConfig = {
                     // 敌机生成间隔的最小值和最大值
                     spawnRate: { min: 5, max: 60 },
                     // 敌机速度的基础增长系数
                     enemySpeedFactor: 0.001,
-                    // 快速敌机速度系数单独配置
-                    fastEnemySpeedFactor: 0.0005,
+                    // 快速敌机速度系数：大幅降低
+                    fastEnemySpeedFactor: 0.0001,
                     // 敌机血量的基础增长系数
                     enemyHpFactor: 0.002,
                     // BOSS血量增长系数
@@ -560,7 +560,7 @@
                         return {
                             ...baseConfig,
                             enemySpeedFactor: 0.0015,
-                            fastEnemySpeedFactor: 0.00075,
+                            fastEnemySpeedFactor: 0.00015,  // 修正：从 0.00075 降低到 0.00015
                             enemyHpFactor: 0.0025,
                             bossHpFactor: 20,
                             bossBulletSpeedFactor: 0.06,
@@ -571,7 +571,7 @@
                         return {
                             ...baseConfig,
                             enemySpeedFactor: 0.002,
-                            fastEnemySpeedFactor: 0.001,
+                            fastEnemySpeedFactor: 0.0002,   // 修正：从 0.001 降低到 0.0002
                             enemyHpFactor: 0.003,
                             bossHpFactor: 25,
                             bossBulletSpeedFactor: 0.07,
@@ -624,7 +624,7 @@
             // 敌机类型
             const ENEMY_TYPES = {
                 NORMAL: { color: '#e74c3c', hp: 1, speed: 2, size: 40, score: 10 },
-                FAST: { color: '#3498db', hp: 1, speed: 5, size: 30, score: 15 },
+                FAST: { color: '#3498db', hp: 1, speed: 4, size: 30, score: 15 }, // 修正：基础速度从5降低到4
                 ARMORED: { color: '#9b59b6', hp: 3, speed: 1, size: 50, score: 30 },
                 BOSS: { color: '#ff0000', hp: 50, speed: 0.8, size: 100, score: 100 }
             };
@@ -891,7 +891,7 @@
                 });
             }
 
-            // 生成敌机
+            // 生成敌机 - 修正了速度计算逻辑
             function spawnEnemy() {
                 // 等级提升逻辑（平滑阈值）
                 const levelUpScore = DIFFICULTY_CONFIG.levelUpBase + (level - 1) * DIFFICULTY_CONFIG.levelUpFactor;
@@ -940,20 +940,36 @@
                 else if (random < 0.75 + hardEnemyProb / 2) enemyType = ENEMY_TYPES.FAST;
                 else enemyType = ENEMY_TYPES.ARMORED;
 
-                // 敌机属性：随分数和等级平滑增长
+                // 敌机属性：随分数和等级平滑增长 - 修正了速度计算
                 const size = enemyType.size + Math.random() * 10;
-                // 为不同类型敌机设置速度上限
+                
+                // 修正：更合理的速度计算公式
                 let speed;
                 if (enemyType === ENEMY_TYPES.FAST) {
-                    // 蓝色快速敌机：降低基础增长系数，设置速度上限
-                    speed = enemyType.speed + score * DIFFICULTY_CONFIG.fastEnemySpeedFactor + (level * 0.02);
-                    speed = Math.min(speed, 8); // 限制最大速度为8（可根据需求调整）
+                    // 快速敌机：使用对数增长避免过快
+                    const fastScoreFactor = Math.min(score / 10000, 1);
+                    const fastLevelFactor = Math.min((level - 1) / 15, 1);
+                    const fastProgress = (fastScoreFactor + fastLevelFactor) / 2;
+                    
+                    // 基础速度 + 对数增长 + 进度影响
+                    speed = enemyType.speed + 
+                            Math.log1p(score * DIFFICULTY_CONFIG.fastEnemySpeedFactor * 100) * 0.5 +
+                            (fastProgress * 3);
+                    
+                    speed = Math.min(speed, 7); // 限制最大速度为7
                 } else {
-                    // 其他敌机保持原有计算
-                    speed = enemyType.speed + score * DIFFICULTY_CONFIG.enemySpeedFactor + (level * 0.05);
-                    // 为其他敌机也设置合理上限
-                    speed = Math.min(speed, 6); // 普通和装甲敌机最大速度6
+                    // 普通和装甲敌机
+                    const normalScoreFactor = Math.min(score / 10000, 1);
+                    const normalLevelFactor = Math.min((level - 1) / 15, 1);
+                    const normalProgress = (normalScoreFactor + normalLevelFactor) / 2;
+                    
+                    speed = enemyType.speed + 
+                            Math.log1p(score * DIFFICULTY_CONFIG.enemySpeedFactor * 100) * 0.3 +
+                            (normalProgress * 2);
+                    
+                    speed = Math.min(speed, 5); // 普通和装甲敌机最大速度5
                 }
+                
                 const hp = enemyType.hp + Math.floor(score * DIFFICULTY_CONFIG.enemyHpFactor + level * 0.1);
 
                 enemies.push({
