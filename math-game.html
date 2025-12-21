@@ -95,7 +95,43 @@ body {
     font-size: 22px;
 }
 
-/* --------------- 核心优化：算式和答案区样式 --------------- */
+/* 新增：卡通进度条样式 */
+.progress-bar {
+    width: 95%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 10px 15px;
+    background: #f0f8fb;
+    border-radius: 20px;
+    border: 2px solid #e1f5fe;
+}
+
+.progress-title {
+    font-size: 16px;
+    color: #2196f3;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.progress-stars {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.star-icon {
+    font-size: 24px;
+    color: #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.star-icon.active {
+    color: #ffd700;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+    transform: scale(1.1);
+}
+
+/* 核心优化：算式和答案区样式 */
 .question-box {
     font-size:30px; /* 放大算式字体 */
     margin:8px auto;
@@ -173,7 +209,7 @@ body {
     box-shadow:inset 0 3px 6px rgba(0,0,0,0.05), 0 3px 8px rgba(144, 238, 144, 0.4);
 }
 
-/* --------------- 符合儿童直觉的数字键盘 --------------- */
+/* 符合儿童直觉的数字键盘 */
 .num-keyboard {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -189,6 +225,7 @@ body {
     border: 3px solid #eeeeee;
 }
 
+/* 新增：强化按键反馈样式 */
 .num-btn {
     padding: 25px 0;
     font-size: 28px; /* 放大按键字体 */
@@ -201,6 +238,9 @@ body {
     transition: all 0.15s ease;
     position: relative;
     overflow: hidden;
+    /* 扩大点击热区 */
+    margin: -5px;
+    z-index: 1;
 }
 
 /* 卡通化按键配色 */
@@ -223,11 +263,29 @@ body {
     background: #1976d2;
 }
 
-/* 点击按压效果增强 */
+/* 新增：按键点击反馈动画 */
 .num-btn:active {
-    transform: translateY(4px);
+    transform: translateY(4px) scale(0.95);
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     opacity: 0.9;
+    animation: flash 0.2s ease;
+}
+
+@keyframes flash {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+    100% { filter: brightness(1); }
+}
+
+/* 答案输入弹跳动画 */
+.answer-display.has-value {
+    animation: bounce 0.3s ease;
+}
+
+@keyframes bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1.03); }
 }
 
 @media (hover: hover) {
@@ -262,6 +320,12 @@ body {
     }
     .title {
         font-size: 28px;
+    }
+    .progress-stars {
+        gap: 5px;
+    }
+    .star-icon {
+        font-size: 20px;
     }
 }
 
@@ -414,6 +478,21 @@ body {
     <div class="level-info" id="levelText">当前关卡：1 城堡大门</div>
     <div class="score-box">累计星星：<span id="score">0</span>颗</div>
 
+    <!-- 新增：卡通进度条 -->
+    <div class="progress-bar">
+        <div class="progress-title">本关进度：</div>
+        <div class="progress-stars" id="progressStars">
+            <span class="star-icon">☆</span>
+            <span class="star-icon">☆</span>
+            <span class="star-icon">☆</span>
+            <span class="star-icon">☆</span>
+            <span class="star-icon">☆</span>
+            <span class="star-icon">☆</span>
+            <span class="star-icon">☆</span>
+            <span class="star-icon">☆</span>
+        </div>
+    </div>
+
     <!-- 算式和答案区域 -->
     <div class="question-box">
         <span class="question-part" id="questionPart">?</span>
@@ -520,6 +599,7 @@ const numBtns = document.querySelectorAll(".num-btn[data-num]");
 const loadingSpinner = document.getElementById("loadingSpinner");
 const hintText = document.getElementById("hintText");
 const userTitle = document.getElementById("userTitle");
+const progressStars = document.getElementById("progressStars"); // 进度条星星
 
 // 初始化游戏（含本地存储恢复）
 function initGame() {
@@ -546,7 +626,12 @@ function initGame() {
         // 更新关卡文本
         levelText.innerText = `当前关卡：${currentLevel + 1} ${levelNames[currentLevel]}`;
     }
-    questionPart.innerText = questionBank[qIndex][0];
+    
+    // 格式化算式（给运算符加颜色）
+    const formattedQuestion = formatQuestion(questionBank[qIndex][0]);
+    questionPart.innerHTML = formattedQuestion;
+    
+    // 重置答案相关
     userAnswer = "";
     answerDisplay.innerText = "";
     answerDisplay.classList.remove("has-value");
@@ -554,9 +639,33 @@ function initGame() {
     errorCount = 0;
     hintText.innerText = ""; // 清空文本（本身已隐藏）
     answerStartTime = Date.now();
+    
+    // 更新进度条
+    updateProgress();
 }
 
-// 处理数字键点击
+// 新增：格式化算式，给运算符添加颜色
+function formatQuestion(question) {
+    return question.replace(/\+/g, '<span style="color:#e91e63">+</span>')
+                   .replace(/-/g, '<span style="color:#2196f3">-</span>')
+                   .replace(/×/g, '<span style="color:#ff9800">×</span>');
+}
+
+// 新增：更新卡通进度条
+function updateProgress() {
+    const stars = progressStars.querySelectorAll(".star-icon");
+    stars.forEach((star, index) => {
+        if (index < currentQuestion) {
+            star.innerText = "★";
+            star.classList.add("active");
+        } else {
+            star.innerText = "☆";
+            star.classList.remove("active");
+        }
+    });
+}
+
+// 处理数字键点击（新增：智能输入限制）
 function handleNumClick(num) {
     if (isChecking) return;
     // 先清除已有定时器，防止叠加
@@ -565,10 +674,15 @@ function handleNumClick(num) {
         inputTimer = null;
     }
     
+    // 新增：智能输入限制 - 根据正确答案位数限制输入
+    const qIndex = currentLevel * totalQuestionsPerLevel + currentQuestion;
+    const correctAnswer = questionBank[qIndex][1];
+    const maxLength = String(correctAnswer).length; // 获取答案的位数
+    
     // 禁止首位0
     if (userAnswer === "" && num === "0") return;
-    // 限制最大输入长度
-    if (userAnswer.length >= 2) return;
+    // 超过最大位数则禁止输入
+    if (userAnswer.length >= maxLength) return;
 
     // 按键反馈：震动+音效
     if (navigator.vibrate) navigator.vibrate(15); // 稍强的震动反馈
@@ -825,7 +939,7 @@ function resetGame() {
     popups.forEach(p => p.remove());
 }
 
-// 处理删除键
+// 处理删除键（新增：长按清空功能）
 function handleDelClick() {
     if (isChecking) return;
     // 清除定时器
@@ -842,6 +956,23 @@ function handleDelClick() {
     if (navigator.vibrate) navigator.vibrate(15);
     playKeySound();
 }
+
+// 新增：长按删除键清空答案
+let longPressTimer = null;
+delBtn.addEventListener("mousedown", () => {
+    longPressTimer = setTimeout(() => {
+        userAnswer = "";
+        answerDisplay.innerText = "";
+        answerDisplay.classList.remove("has-value");
+        if (navigator.vibrate) navigator.vibrate(20);
+    }, 500); // 长按500ms清空
+});
+delBtn.addEventListener("mouseup", () => {
+    clearTimeout(longPressTimer);
+});
+delBtn.addEventListener("mouseleave", () => {
+    clearTimeout(longPressTimer);
+});
 
 // 绑定事件
 numBtns.forEach(btn => {
