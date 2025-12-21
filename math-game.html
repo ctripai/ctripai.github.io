@@ -10,21 +10,66 @@ body {background:linear-gradient(#f9f6e8, #f0ead6);min-height:100vh;display:flex
 .game-container {width:90%;max-width:500px;background:#faf6e9;border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,0.15);padding:25px;text-align:center;border:5px solid #ff9800;position:relative;z-index:10;}
 .title {color:#e91e63;font-size:32px;margin-bottom:15px;text-shadow:2px 2px 4px rgba(0,0,0,0.1);font-weight:bold;}
 .level-info {font-size:20px;color:#2196f3;margin:10px 0;background:#f7f2df;padding:8px;border-radius:10px;}
-.question-box {font-size:28px;margin:20px 0;padding:20px;background:#fff8e1;border-radius:15px;border:3px dashed #ffc107;font-weight:bold;}
-/* 答案框样式修改：下划线样式，默认空白 */
-.answer-display {
-display: inline-block;
-min-width: 80px;
-font-size:28px;
-text-align: center;
-margin: 0 5px;
-color: #2e7d32;
-font-weight: bold;
-border-bottom: 4px solid #4caf50;
-background: transparent;
+
+/* --------------- 核心优化：算式及答案容器 --------------- */
+.question-box {
+    font-size: 32px; /* 增大字体，提升可读性 */
+    margin: 25px 0;
+    padding: 25px 30px;
+    background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%); /* 渐变背景，更有质感 */
+    border-radius: 20px;
+    border: 3px solid #ffc107;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2); /* 轻微阴影，增强立体感 */
+    letter-spacing: 0.5px; /* 字间距优化，提升可读性 */
 }
+/* 算式部分样式 */
+.question-part {
+    color: #333; /* 深灰色，更稳重 */
+    margin-right: 10px;
+    line-height: 1; /* 行高统一，对齐更精准 */
+}
+/* 答案显示区域优化 */
+.answer-display {
+    display: inline-block;
+    min-width: 100px; /* 增大最小宽度，输入更舒适 */
+    font-size: 32px;
+    text-align: center;
+    margin: 0 5px;
+    color: #2e7d32;
+    font-weight: bold;
+    background: #f1f8e9;
+    border-radius: 12px;
+    padding: 8px 15px; /* 增加内边距，更饱满 */
+    vertical-align: middle;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); /* 内阴影，增强质感 */
+    transition: all 0.2s ease; /* 过渡效果，用于交互反馈 */
+    border: 2px solid transparent; /* 透明边框，避免切换时位移 */
+}
+/* 答案输入时的交互反馈 */
+.answer-display.has-value {
+    border-color: #81c784; /* 有内容时显示浅绿边框 */
+    transform: scale(1.02); /* 轻微放大，强化操作感 */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05), 0 2px 6px rgba(144, 238, 144, 0.3);
+}
+/* 空状态占位符 */
+.answer-display::placeholder {
+    color: #bdbdbd;
+    font-weight: normal;
+    font-size: 28px;
+}
+
+/* --------------- 其他样式保持不变 --------------- */
 .num-keyboard {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:280px;margin:25px auto;}
 .num-btn {padding:18px 0;font-size:24px;border:none;border-radius:15px;cursor:pointer;color:#fff;font-weight:bold;box-shadow:0 4px 8px rgba(0,0,0,0.2);transition:all 0.2s;}
+.num-btn.zero-btn {grid-column: span 2;}
 .num-btn:hover {transform:translateY(-3px);box-shadow:0 6px 12px rgba(0,0,0,0.25);}
 .num-btn:nth-child(1) {background:#e91e63;}
 .num-btn:nth-child(2) {background:#9c27b0;}
@@ -36,7 +81,8 @@ background: transparent;
 .num-btn:nth-child(8) {background:#009688;}
 .num-btn:nth-child(9) {background:#4caf50;}
 .num-btn:nth-child(10) {background:#8bc34a;}
-.del-btn {background:#ff5722 !important;}
+.num-btn:nth-child(11) {background:#ff5722;}
+.del-btn {font-size: 22px;}
 .btn {padding:12px 30px;font-size:20px;background:#ff9800;color:#fff;border:none;border-radius:15px;cursor:pointer;margin:15px;box-shadow:0 4px 8px rgba(0,0,0,0.2);}
 .btn:hover {background:#f57c00;transform:translateY(-2px);}
 .score-box {font-size:20px;color:#e91e63;margin:15px 0;font-weight:bold;}
@@ -82,61 +128,16 @@ line-height:1.4;
 .confetti {position:absolute;width:10px;height:30px;opacity:0.8;animation:fallConfetti 3s ease-in-out forwards;z-index:999;}
 @keyframes fallConfetti {0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
 
-/* 语音控制按钮样式 */
-.speech-controls {
-display: flex;
-justify-content: center;
-gap: 10px;
-margin: 15px 0;
-}
-.speech-btn {
-padding: 8px 15px;
-font-size: 16px;
-border: none;
-border-radius: 10px;
-cursor: pointer;
-background: #4caf50;
-color: white;
-box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-transition: all 0.2s;
-}
-.speech-btn:hover {
-transform: translateY(-2px);
-box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-}
-.speech-btn.stop {
-background: #f44336;
-}
-.speech-btn.pause {
-background: #ff9800;
-}
-
-/* 语音设置面板 */
-.speech-settings {
-margin: 10px 0;
-padding: 10px;
-background: #e8f5e9;
-border-radius: 10px;
-}
-.speech-setting {
-margin: 8px 0;
-display: flex;
-align-items: center;
-justify-content: space-between;
-}
-.speech-setting label {
-font-size: 14px;
-color: #333;
-}
-.speech-setting input {
-width: 100px;
-}
-
-/* 语音状态提示 */
-.speech-status {
-font-size: 14px;
-color: #666;
-margin: 5px 0;
+/* 响应式适配：小屏幕缩小字体 */
+@media (max-width: 375px) {
+    .question-box {
+        font-size: 28px;
+        padding: 20px 25px;
+    }
+    .answer-display {
+        font-size: 28px;
+        min-width: 80px;
+    }
 }
 </style>
 </head>
@@ -146,45 +147,26 @@ margin: 5px 0;
 <div class="level-info" id="levelText">当前关卡：1 城堡大门</div>
 <div class="score-box">累计星星：<span id="score">0</span>颗</div>
 
-<!-- 语音控制区域 -->
-<div class="speech-controls">
-    <button class="speech-btn" id="playQuestionBtn">🔊 听题目</button>
-    <button class="speech-btn pause" id="pauseSpeechBtn">⏸️ 暂停</button>
-    <button class="speech-btn stop" id="stopSpeechBtn">⏹️ 停止</button>
-</div>
-
-<div class="speech-status" id="speechStatus">语音播报就绪</div>
-
-<!-- 语音设置 -->
-<div class="speech-settings">
-    <div class="speech-setting">
-        <label for="speechRate">语速：</label>
-        <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="1">
-        <span id="rateValue">1.0</span>
-    </div>
-    <div class="speech-setting">
-        <label for="speechPitch">音调：</label>
-        <input type="range" id="speechPitch" min="0.5" max="2" step="0.1" value="1">
-        <span id="pitchValue">1.0</span>
-    </div>
-    <div class="speech-setting">
-        <label for="speechVolume">音量：</label>
-        <input type="range" id="speechVolume" min="0" max="1" step="0.1" value="1">
-        <span id="volumeValue">1.0</span>
-    </div>
-</div>
-
-<!-- 问题框结构调整，将答案框整合到算式后 -->
+<!-- 优化算式和答案的DOM结构，增加类名区分 -->
 <div class="question-box">
-<span id="questionPart">?</span>
-<span class="answer-display" id="answerDisplay"></span>
+<span class="question-part" id="questionPart">?</span>
+<span class="answer-display" id="answerDisplay" contenteditable="false" placeholder="请输入答案"></span>
 </div>
+
 <div class="num-keyboard">
-<button class="num-btn">1</button><button class="num-btn">2</button><button class="num-btn">3</button>
-<button class="num-btn">4</button><button class="num-btn">5</button><button class="num-btn">6</button>
-<button class="num-btn">7</button><button class="num-btn">8</button><button class="num-btn">9</button>
-<button class="num-btn">0</button><button class="num-btn del-btn" id="delBtn">删除</button>
+<button class="num-btn">1</button>
+<button class="num-btn">2</button>
+<button class="num-btn">3</button>
+<button class="num-btn">4</button>
+<button class="num-btn">5</button>
+<button class="num-btn">6</button>
+<button class="num-btn">7</button>
+<button class="num-btn">8</button>
+<button class="num-btn">9</button>
+<button class="num-btn zero-btn">0</button>
+<button class="num-btn del-btn" id="delBtn">⌫</button>
 </div>
+
 <div class="result" id="result"></div>
 <div class="reward hidden" id="reward"></div>
 </div>
@@ -210,14 +192,13 @@ const rewardTexts = [
 let currentLevel = 0, currentQuestion = 0, score = 0, userAnswer = "", isChecking = false;
 const totalQuestionsPerLevel = 8, answerDelay = 1200, levelUpDelay = 3000;
 
-// 语音合成相关变量
+// 语音合成相关变量（调整参数使声音更温柔）
 let speechSynthesis = window.speechSynthesis;
 let currentUtterance = null;
-let isSpeaking = false;
 let speechSettings = {
-    rate: 1.0,
-    pitch: 1.0,
-    volume: 1.0,
+    rate: 0.8,
+    pitch: 1.2,
+    volume: 0.8,
     voice: null
 };
 
@@ -231,38 +212,20 @@ const reward = document.getElementById("reward");
 const delBtn = document.getElementById("delBtn");
 const numBtns = document.querySelectorAll(".num-btn:not(#delBtn)");
 
-// 语音控制元素
-const playQuestionBtn = document.getElementById("playQuestionBtn");
-const pauseSpeechBtn = document.getElementById("pauseSpeechBtn");
-const stopSpeechBtn = document.getElementById("stopSpeechBtn");
-const speechStatus = document.getElementById("speechStatus");
-const speechRate = document.getElementById("speechRate");
-const speechPitch = document.getElementById("speechPitch");
-const speechVolume = document.getElementById("speechVolume");
-const rateValue = document.getElementById("rateValue");
-const pitchValue = document.getElementById("pitchValue");
-const volumeValue = document.getElementById("volumeValue");
-
 // 初始化游戏
 function initGame() {
     const qIndex = currentLevel * totalQuestionsPerLevel + currentQuestion;
-    if (qIndex >= questionBank.length) return; // 防止越界
+    if (qIndex >= questionBank.length) return;
     questionPart.innerText = questionBank[qIndex][0];
     result.innerText = "";
     userAnswer = "";
-    answerDisplay.innerText = ""; // 答案框默认空白
+    answerDisplay.innerText = "";
+    answerDisplay.classList.remove("has-value"); // 移除有内容的样式
     reward.classList.add("hidden");
     isChecking = false;
-
-    // 自动播报新题目
-    setTimeout(() => {
-        if (speechSynthesis && speechSynthesis.onvoiceschanged !== undefined) {
-            speakQuestion();
-        }
-    }, 500);
 }
 
-// 页面加载后立即初始化游戏，显示第一题
+// 页面加载后初始化
 initGame();
 
 // 数字键盘事件
@@ -270,10 +233,11 @@ numBtns.forEach(btn => {
     btn.addEventListener("click", () => {
         if (isChecking) return;
         const num = btn.innerText;
-        if (userAnswer === "" && num === "0") return; // 避免前导零
+        if (userAnswer === "" && num === "0") return;
         if (userAnswer.length >= 2) return;
         userAnswer += num;
         answerDisplay.innerText = userAnswer;
+        answerDisplay.classList.add("has-value"); // 添加有内容的样式
         autoSubmit();
     });
 });
@@ -283,6 +247,7 @@ delBtn.addEventListener("click", () => {
     if (isChecking) return;
     userAnswer = userAnswer.slice(0, -1);
     answerDisplay.innerText = userAnswer;
+    if (!userAnswer) answerDisplay.classList.remove("has-value"); // 无内容时移除样式
 });
 
 // 创建彩屑动画
@@ -336,7 +301,6 @@ function autoSubmit() {
         
         scoreSpan.innerText = score;
         
-        // 下一题或关卡升级
         if (currentQuestion < totalQuestionsPerLevel - 1) {
             setTimeout(() => {
                 currentQuestion++;
@@ -385,91 +349,46 @@ function createStarAnimation() {
 // 最终通关弹窗
 function showFinalPopup() {
     const popup = document.createElement("div");
-    popup.className = "level-up-popup";
+    popup.className = 'level-up-popup';
     popup.innerHTML = `<h2 class="popup-title">恭喜通关！🏆</h2><p class="popup-desc">你是数学小王者！</p><p class="popup-desc">累计获得 ${score} 颗星星</p><button class="btn" onclick="this.parentElement.remove()">太棒啦！</button>`;
     document.body.appendChild(popup);
 }
 
-// 语音合成功能初始化
+// 语音合成初始化
 function initSpeechSynthesis() {
     if ('speechSynthesis' in window) {
         speechSynthesis = window.speechSynthesis;
         
-        // 获取可用语音
         speechSynthesis.onvoiceschanged = function() {
             const voices = speechSynthesis.getVoices();
-            // 选择中文语音
             const chineseVoices = voices.filter(voice => 
-                voice.lang.includes('zh') || voice.name.includes('Chinese')
+                (voice.lang.includes('zh') || voice.name.includes('Chinese')) && 
+                (voice.name.includes('Female') || voice.name.includes('女') || voice.gender === 'female')
             );
             
             if (chineseVoices.length > 0) {
                 speechSettings.voice = chineseVoices[0];
-                speechStatus.textContent = "语音播报已就绪";
             } else {
-                speechStatus.textContent = "未找到中文语音包";
+                const defaultChinese = voices.filter(voice => voice.lang.includes('zh') || voice.name.includes('Chinese'));
+                if (defaultChinese.length > 0) {
+                    speechSettings.voice = defaultChinese[0];
+                }
             }
         };
         
-        // 触发语音列表加载
         speechSynthesis.getVoices();
-    } else {
-        // 浏览器不支持语音合成时的处理
-        speechStatus.textContent = "您的浏览器不支持语音合成";
-        // 禁用相关按钮
-        playQuestionBtn.disabled = true;
-        pauseSpeechBtn.disabled = true;
-        stopSpeechBtn.disabled = true;
     }
 }
 
-// 播报题目
-function speakQuestion() {
-    if (!speechSynthesis) return;
-    
-    // 停止当前可能正在进行的播报
-    stopSpeech();
-    
-    const questionText = questionPart.innerText.replace('=', '等于多少');
-    currentUtterance = new SpeechSynthesisUtterance(questionText);
-    
-    // 应用语音设置
-    currentUtterance.rate = speechSettings.rate;
-    currentUtterance.pitch = speechSettings.pitch;
-    currentUtterance.volume = speechSettings.volume;
-    if (speechSettings.voice) {
-        currentUtterance.voice = speechSettings.voice;
-    }
-    
-    // 状态更新
-    currentUtterance.onstart = function() {
-        isSpeaking = true;
-        speechStatus.textContent = "正在播报题目...";
-    };
-    
-    currentUtterance.onend = function() {
-        isSpeaking = false;
-        speechStatus.textContent = "语音播报完成";
-    };
-    
-    currentUtterance.onerror = function() {
-        isSpeaking = false;
-        speechStatus.textContent = "语音播报出错";
-    };
-    
-    // 开始播报
-    speechSynthesis.speak(currentUtterance);
-}
-
-// 播报普通文本
+// 播报文本
 function speakText(text) {
     if (!speechSynthesis) return;
     
-    stopSpeech();
+    if (currentUtterance) {
+        speechSynthesis.cancel(currentUtterance);
+    }
     
     currentUtterance = new SpeechSynthesisUtterance(text);
-    
-    // 应用设置
     currentUtterance.rate = speechSettings.rate;
     currentUtterance.pitch = speechSettings.pitch;
     currentUtterance.volume = speechSettings.volume;
@@ -480,61 +399,7 @@ function speakText(text) {
     speechSynthesis.speak(currentUtterance);
 }
 
-// 暂停语音
-function pauseSpeech() {
-    if (speechSynthesis && isSpeaking) {
-        speechSynthesis.pause();
-        isSpeaking = false;
-        speechStatus.textContent = "语音已暂停";
-    }
-}
-
-// 恢复语音
-function resumeSpeech() {
-    if (speechSynthesis && !isSpeaking) {
-        speechSynthesis.resume();
-        isSpeaking = true;
-        speechStatus.textContent = "继续播报...";
-    }
-}
-
-// 停止语音
-function stopSpeech() {
-    if (speechSynthesis) {
-        speechSynthesis.cancel();
-        isSpeaking = false;
-        speechStatus.textContent = "语音已停止";
-    }
-}
-
-// 语音设置调整事件
-speechRate.addEventListener('input', function() {
-    speechSettings.rate = parseFloat(this.value);
-    rateValue.textContent = speechSettings.rate.toFixed(1);
-});
-
-speechPitch.addEventListener('input', function() {
-    speechSettings.pitch = parseFloat(this.value);
-    pitchValue.textContent = speechSettings.pitch.toFixed(1);
-});
-
-speechVolume.addEventListener('input', function() {
-    speechSettings.volume = parseFloat(this.value);
-    volumeValue.textContent = speechSettings.volume.toFixed(1);
-});
-
-// 绑定语音控制按钮事件
-playQuestionBtn.addEventListener('click', speakQuestion);
-pauseSpeechBtn.addEventListener('click', function() {
-    if (isSpeaking) {
-        pauseSpeech();
-    } else {
-        resumeSpeech();
-    }
-});
-stopSpeechBtn.addEventListener('click', stopSpeech);
-
-// 初始化语音合成
+// 初始化语音
 initSpeechSynthesis();
 </script>
 </body>
