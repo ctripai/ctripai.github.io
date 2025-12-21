@@ -663,25 +663,34 @@
             let audioContext;
             function initAudioContext() {
                 try {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (!audioContext) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    // 确保音频上下文处于运行状态
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
                 } catch (e) {
-                    console.log('Web Audio API 不受支持:', e);
+                    console.log('Web Audio API 不受支持或初始化失败:', e);
+                    audioContext = null;
                 }
             }
 
             function playBeep(freq = 440, duration = 100) {
                 if (!soundOn || !userInteracted || !audioContext) return;
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.frequency.value = freq;
-                gainNode.gain.value = 0.1;
-                oscillator.start();
-                setTimeout(() => oscillator.stop(), duration);
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    oscillator.frequency.value = freq;
+                    gainNode.gain.value = 0.1;
+                    oscillator.start();
+                    setTimeout(() => oscillator.stop(), duration);
+                } catch (e) {
+                    console.log('Web Audio API 播放失败:', e);
+                }
             }
-
-            initAudioContext();
 
             // 画布适配
             function resizeCanvas() {
@@ -695,15 +704,16 @@
             }
 
             // 本地存储
-            let historyScore = localStorage.getItem('planeGameHighScore') || 0;
-            let historyMaxStage = localStorage.getItem('planeGameMaxStage') || 1;
-            let historyTotalKills = localStorage.getItem('planeGameTotalKills') || 0;
+            let historyScore = parseInt(localStorage.getItem('planeGameHighScore')) || 0;
+            let historyMaxStage = parseInt(localStorage.getItem('planeGameMaxStage')) || 1;
+            let historyTotalKills = parseInt(localStorage.getItem('planeGameTotalKills')) || 0;
             historyScoreElement.textContent = historyScore;
             historyStageElement.textContent = historyMaxStage;
             historyKillsElement.textContent = historyTotalKills;
 
             // 游戏核心参数 - 关卡系统
             let gameRunning = false;
+            let gameLoopRunning = false;
             let score = 0;
             let life = 3;
             let level = 1; // 等级（经验值）
@@ -780,7 +790,7 @@
             let penetrateTime = 0;
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-            // 关卡配置 - 修复：调整关卡配置
+            // 关卡配置
             const STAGE_CONFIG = {
                 1: { name: "训练关", waves: 2, target: 200, enemyTypes: ['NORMAL'], boss: false, enemyCount: 5 },
                 2: { name: "太空航道", waves: 2, target: 400, enemyTypes: ['NORMAL', 'FAST'], boss: false, enemyCount: 8 },
@@ -802,14 +812,20 @@
                 const hpMultiplier = 1 + (stageNum - 1) * 0.2;
                 
                 return {
-                    spawnRate: { min: 4, max: 60 - Math.min(stageNum * 3, 30) },
+                    spawnRate: { 
+                        min: 4, 
+                        max: Math.max(30, 60 - Math.min(stageNum * 3, 30))
+                    },
                     enemySpeedFactor: baseDifficulty + stageFactor,
                     enemyHpFactor: 0.002,
-                    bossHpFactor: 15 + (stageNum * 3),
+                    bossHpFactor: 3,
                     bossBulletSpeedFactor: 0.05 + (stageNum * 0.01),
                     levelUpBase: 200 + (stageNum * 20),
                     levelUpFactor: 50 + (stageNum * 5),
-                    propDropRate: { base: 0.2 - (stageNum * 0.01), difficultyCompensate: 0.00005 },
+                    propDropRate: { 
+                        base: Math.max(0.05, 0.2 - (stageNum * 0.01)),
+                        difficultyCompensate: 0.00005 
+                    },
                     speedMultiplier: speedMultiplier,
                     hpMultiplier: hpMultiplier
                 };
@@ -820,6 +836,7 @@
             // 显示关卡提示
             function showStageNotice() {
                 gameRunning = false;
+                gameLoopRunning = false;
                 stageNumberElement.textContent = stage;
                 const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
                 stageDescElement.textContent = config.name;
@@ -833,7 +850,7 @@
                 stageNotice.style.display = 'block';
             }
 
-            // 开始新关卡 - 修复：简化关卡开始逻辑
+            // 开始新关卡
             function startNewStage() {
                 const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
                 wavesInStage = config.waves;
@@ -846,10 +863,12 @@
                 stageCompleted = false;
                 bossSpawned = false;
                 
-                // 清空所有敌人和子弹
+                // 清空所有游戏对象
                 enemies = [];
                 enemyBullets = [];
                 explosions = [];
+                bullets = [];
+                props = [];
                 
                 // 重置敌人生成计时器
                 enemySpawnTimer = 0;
@@ -864,10 +883,9 @@
                 startNextWave();
             }
 
-            // 开始下一波敌人 - 修复：简化波次生成逻辑
+            // 开始下一波敌人
             function startNextWave() {
                 if (currentWave >= wavesInStage) {
-                    // 所有波次已完成
                     return;
                 }
                 
@@ -875,18 +893,18 @@
                 const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
                 
                 // 每波敌人数量
-                enemiesToSpawn = config.enemyCount + (currentWave - 1) * 2;
+                enemiesToSpawn = config.boss ? 1 : config.enemyCount + (currentWave - 1) * 2;
                 enemiesInCurrentWave = 0;
-                waveSpawning = true;
+                waveSpawning = !config.boss; // BOSS关不进行波次生成
                 
                 // 重置生成计时器
                 enemySpawnTimer = 0;
                 
                 showPropTip(canvas.width/2, canvas.height/2, `第 ${currentWave}/${wavesInStage} 波敌人`);
                 
-                // 如果是BOSS关，直接生成BOSS
+                // BOSS关直接生成BOSS
                 if (config.boss && !bossSpawned) {
-                    const bossHp = ENEMY_TYPES.BOSS.hp * DIFFICULTY_CONFIG.hpMultiplier + (stage - 1) * DIFFICULTY_CONFIG.bossHpFactor;
+                    const bossHp = ENEMY_TYPES.BOSS.hp + (stage - 1) * DIFFICULTY_CONFIG.bossHpFactor;
                     enemies.push({
                         type: ENEMY_TYPES.BOSS,
                         x: canvas.width / 2 - ENEMY_TYPES.BOSS.size/2,
@@ -895,22 +913,22 @@
                         height: ENEMY_TYPES.BOSS.size,
                         speed: ENEMY_TYPES.BOSS.speed,
                         hp: bossHp,
-                        score: ENEMY_TYPES.BOSS.score,
+                        score: ENEMY_TYPES.BOSS.score * stage,
                         shootTimer: 0
                     });
                     bossSpawned = true;
-                    enemiesInCurrentWave = enemiesToSpawn; // BOSS关只有1个敌人
+                    enemiesInCurrentWave = 1;
                     waveSpawning = false;
                     showPropTip(canvas.width/2, 100, `BOSS出现！`);
                 }
             }
 
-            // 检查关卡完成 - 修复：简化关卡完成逻辑
+            // 检查关卡完成
             function checkStageComplete() {
                 if (stageCompleted) return;
                 
-                // 如果达到目标分数且没有敌人了
-                if (stageScore >= stageTargetScore && enemies.length === 0) {
+                // 如果达到目标分数且没有敌人了，并且不是BOSS关的波次进行中
+                if (stageScore >= stageTargetScore && enemies.length === 0 && !waveSpawning) {
                     stageCompleted = true;
                     
                     // 关卡完成奖励
@@ -979,12 +997,10 @@
             stageContinueBtn.addEventListener('click', () => {
                 stageNotice.style.display = 'none';
                 gameRunning = true;
+                gameLoopRunning = true;
                 startNewStage();
                 // 启动游戏循环
-                if (!gameLoopRunning) {
-                    gameLoopRunning = true;
-                    requestAnimationFrame(gameLoop);
-                }
+                requestAnimationFrame(gameLoop);
             });
 
             // 绘制玩家飞机
@@ -1122,7 +1138,7 @@
                 });
             }
 
-            // 生成敌机 - 修复：简化敌机生成逻辑
+            // 生成敌机
             function spawnEnemy() {
                 if (!waveSpawning) return;
                 
@@ -1134,12 +1150,10 @@
                     return;
                 }
                 
-                // BOSS关已经处理过了
-                if (config.boss) return;
-                
-                // 每30帧生成一个敌人（可根据难度调整）
+                // 敌机生成间隔
                 enemySpawnTimer++;
-                if (enemySpawnTimer % Math.max(20, 40 - stage * 2) !== 0) {
+                const spawnInterval = Math.max(10, 40 - stage * 2);
+                if (enemySpawnTimer % spawnInterval !== 0) {
                     return;
                 }
                 
@@ -1166,11 +1180,6 @@
                 });
                 
                 enemiesInCurrentWave++;
-                
-                // 检查是否生成本波所有敌人
-                if (enemiesInCurrentWave >= enemiesToSpawn) {
-                    waveSpawning = false;
-                }
             }
 
             // 绘制敌机
@@ -1322,7 +1331,7 @@
                         break;
                     case 'shield':
                         player.shield = true;
-                        player.shieldTime = 8000;
+                        player.shieldTime = 500; // 帧数（约8秒）
                         showPropTip(player.x, player.y, desc);
                         break;
                     case 'clear':
@@ -1336,7 +1345,7 @@
                         break;
                     case 'superBullet':
                         player.superBullet = true;
-                        player.superBulletTime = 10000;
+                        player.superBulletTime = 625; // 帧数（约10秒）
                         showPropTip(player.x, player.y, desc);
                         break;
                     case 'bomb':
@@ -1520,15 +1529,7 @@
                 life--;
                 lifeElement.textContent = life;
                 player.invincible = true;
-                let flashTimer = 0;
-                const flashInterval = setInterval(() => {
-                    flashTimer++;
-                    if (flashTimer > 10) {
-                        clearInterval(flashInterval);
-                        player.invincible = false;
-                    }
-                }, 100);
-
+                player.invincibleTime = 100; // 约1.6秒无敌时间
                 if (life <= 0) {
                     addExplosion(player.x + player.width/2, player.y + player.height/2, player.width * 2);
                     gameOverFunc();
@@ -1546,6 +1547,8 @@
 
                 // 停止背景音乐
                 bgMusic.pause();
+                bgMusic.currentTime = 0;
+                
                 // 播放游戏结束音效
                 playSound(gameOverSound);
                 playBeep(100, 500);
@@ -1563,8 +1566,10 @@
                     historyStageElement.textContent = historyMaxStage;
                 }
 
-                localStorage.setItem('planeGameTotalKills', 
-                    Math.max(historyTotalKills, totalKills));
+                const newTotalKills = Math.max(historyTotalKills, totalKills);
+                localStorage.setItem('planeGameTotalKills', newTotalKills);
+                historyTotalKills = newTotalKills;
+                historyKillsElement.textContent = historyTotalKills;
             }
 
             // 重置游戏
@@ -1648,12 +1653,9 @@
             }
 
             // 游戏主循环
-            let gameLoopRunning = false;
             function gameLoop() {
-                if (!gameRunning) {
-                    // 如果游戏没有运行，但循环还在继续，我们需要继续调用
-                    requestAnimationFrame(gameLoop);
-                    return;
+                if (!gameRunning || !gameLoopRunning) {
+                    return; // 直接返回，不继续循环
                 }
 
                 drawBackground();
@@ -1678,43 +1680,61 @@
                 player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
                 player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
 
-                // 道具效果倒计时
+                // 道具效果倒计时（以帧为单位）
                 if (player.shield) {
-                    player.shieldTime -= 16;
-                    if (player.shieldTime <= 0) player.shield = false;
+                    player.shieldTime -= 1;
+                    if (player.shieldTime <= 0) {
+                        player.shield = false;
+                        showPropTip(player.x, player.y, '护盾消失');
+                    }
                 }
 
                 if (player.speedBoost) {
-                    player.speedBoostTime -= 16;
+                    player.speedBoostTime -= 1;
                     if (player.speedBoostTime <= 0) {
                         player.speedBoost = false;
                         player.speed = player.baseSpeed;
+                        showPropTip(player.x, player.y, '速度加成结束');
                     }
                 }
 
                 if (player.superBullet) {
-                    player.superBulletTime -= 16;
-                    if (player.superBulletTime <= 0) player.superBullet = false;
+                    player.superBulletTime -= 1;
+                    if (player.superBulletTime <= 0) {
+                        player.superBullet = false;
+                        showPropTip(player.x, player.y, '超级子弹效果结束');
+                    }
                 }
 
                 if (player.invincible) {
-                    player.invincibleTime -= 16;
-                    if (player.invincibleTime <= 0) player.invincible = false;
+                    player.invincibleTime -= 1;
+                    if (player.invincibleTime <= 0) {
+                        player.invincible = false;
+                    }
                 }
 
                 if (scoreDouble) {
-                    scoreDoubleTime -= 16;
-                    if (scoreDoubleTime <= 0) scoreDouble = false;
+                    scoreDoubleTime -= 1;
+                    if (scoreDoubleTime <= 0) {
+                        scoreDouble = false;
+                        showPropTip(player.x, player.y, '双倍积分结束');
+                    }
                 }
 
                 if (player.lifeShield) {
-                    player.lifeShieldTime -= 16;
-                    if (player.lifeShieldTime <= 0) player.lifeShield = false;
+                    player.lifeShieldTime -= 1;
+                    if (player.lifeShieldTime <= 0) {
+                        player.lifeShield = false;
+                        showPropTip(player.x, player.y, '生命护盾结束');
+                    }
                 }
 
                 if (penetrateBullet) {
-                    penetrateTime -= 16;
-                    if (penetrateTime <= 0) penetrateBullet = false;
+                    penetrateTime -= 1;
+                    if (penetrateTime <= 0) {
+                        penetrateBullet = false;
+                        showPropTip(player.x, player.y, '穿透子弹结束');
+                    }
                 }
 
                 // 等级提升逻辑
@@ -1767,9 +1787,7 @@
                 startScreen.style.display = 'none';
                 userInteracted = true;
                 
-                if (audioContext && audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
+                initAudioContext(); // 确保音频上下文初始化
                 
                 resetGame();
                 showStageNotice();
