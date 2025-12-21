@@ -219,6 +219,12 @@
             display: none;
             touch-action: none;
             box-shadow: 0 0 30px rgba(51, 204, 255, 0.5);
+            transition: background-color 0.2s;
+        }
+
+        .auto-shoot-area.active {
+            background: rgba(0, 204, 255, 0.6);
+            box-shadow: 0 0 40px rgba(51, 204, 255, 0.8);
         }
 
         .auto-shoot-area span {
@@ -805,6 +811,7 @@
             const shareBtn = document.getElementById('shareBtn');
             const joystickContainer = document.getElementById('joystickContainer');
             const autoShootArea = document.getElementById('autoShootArea');
+            const joystickHandle = document.querySelector('.joystick-handle');
             
             // 检测设备类型
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -828,7 +835,11 @@
             let joystickCenterY = 0;
             let joystickHandleX = 0;
             let joystickHandleY = 0;
-            const joystickRadius = isMobile ? 50 : 70;
+            let joystickTouchId = null; // 跟踪触摸ID
+            const joystickRadius = 80; // 摇杆半径
+            
+            // 自动射击区域变量
+            let autoShootTouchId = null;
             
             // 键盘控制变量（PC端）
             let keys = {};
@@ -867,13 +878,13 @@
             // 游戏元素
             let player = {
                 x: 0, y: 0,
-                width: 60, height: 80, // 增加高度，让飞船更酷
+                width: 60, height: 80,
                 speed: isMobile ? 6 : 7,
                 invincible: false,
                 invincibleTime: 0,
                 fireLevel: 1,
                 bullets: [],
-                engineGlow: 0 // 引擎发光动画
+                engineGlow: 0
             };
             
             let enemies = [];
@@ -884,11 +895,9 @@
             
             // ========== 修复手机端开始游戏无响应问题 ==========
             function setupStartButton() {
-                // 确保按钮可以点击
                 mainStartBtn.style.cursor = 'pointer';
                 mainStartBtn.style.pointerEvents = 'auto';
                 
-                // 添加触摸和点击事件监听
                 mainStartBtn.addEventListener('click', startGameHandler);
                 mainStartBtn.addEventListener('touchstart', function(e) {
                     e.preventDefault();
@@ -905,7 +914,7 @@
                 startScreen.style.display = 'none';
                 gameContainer.style.display = 'flex';
                 
-                // 立即开始游戏，不等待
+                // 立即开始游戏
                 resizeCanvas();
                 resetGame();
                 startGame();
@@ -942,6 +951,7 @@
                 autoShootCheck.addEventListener('change', function() {
                     autoShoot = this.checked;
                     localStorage.setItem('kidAutoShoot', autoShoot);
+                    updateAutoShoot();
                 });
                 
                 easyModeCheck.addEventListener('change', function() {
@@ -977,47 +987,107 @@
                 }
             }
             
+            function updateAutoShoot() {
+                if (!autoShoot) {
+                    autoShootArea.classList.remove('active');
+                }
+            }
+            
             window.closeParentControls = function() {
                 parentControls.style.display = 'none';
             };
             
-            // ========== 虚拟摇杆功能 ==========
+            // ========== 虚拟摇杆功能（修复版） ==========
             function initJoystick() {
                 if (!isMobile) return;
                 
                 const joystickBase = joystickContainer.querySelector('.joystick-base');
-                const joystickHandle = joystickContainer.querySelector('.joystick-handle');
                 
-                // 设置摇杆位置
+                // 设置摇杆初始位置
                 const rect = joystickContainer.getBoundingClientRect();
                 joystickCenterX = rect.left + rect.width / 2;
                 joystickCenterY = rect.top + rect.height / 2;
                 joystickHandleX = joystickCenterX;
                 joystickHandleY = joystickCenterY;
                 
-                // 触摸事件
-                joystickContainer.addEventListener('touchstart', handleTouchStart, {passive: false});
-                document.addEventListener('touchmove', handleTouchMove, {passive: false});
-                document.addEventListener('touchend', handleTouchEnd, {passive: false});
+                // 更新摇杆手柄位置
+                updateJoystickVisual();
+                
+                // 触摸事件 - 使用事件委托
+                document.addEventListener('touchstart', handleTouchStart, { passive: false });
+                document.addEventListener('touchmove', handleTouchMove, { passive: false });
+                document.addEventListener('touchend', handleTouchEnd, { passive: false });
+                document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
                 
                 function handleTouchStart(e) {
-                    joystickActive = true;
-                    updateJoystickPosition(e.touches[0].clientX, e.touches[0].clientY);
-                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const touchX = touch.clientX;
+                    const touchY = touch.clientY;
+                    
+                    // 检查是否触摸到摇杆区域
+                    const rect = joystickContainer.getBoundingClientRect();
+                    const distance = Math.sqrt(
+                        Math.pow(touchX - (rect.left + rect.width / 2), 2) +
+                        Math.pow(touchY - (rect.top + rect.height / 2), 2)
+                    );
+                    
+                    if (distance <= rect.width / 2) {
+                        joystickActive = true;
+                        joystickTouchId = touch.identifier;
+                        updateJoystickPosition(touchX, touchY);
+                        e.preventDefault();
+                    }
+                    
+                    // 检查是否触摸到自动射击区域
+                    const autoShootRect = autoShootArea.getBoundingClientRect();
+                    if (touchX >= autoShootRect.left && touchX <= autoShootRect.right &&
+                        touchY >= autoShootRect.top && touchY <= autoShootRect.bottom) {
+                        autoShoot = true;
+                        autoShootArea.classList.add('active');
+                        autoShootTouchId = touch.identifier;
+                        e.preventDefault();
+                    }
                 }
                 
                 function handleTouchMove(e) {
-                    if (!joystickActive) return;
-                    updateJoystickPosition(e.touches[0].clientX, e.touches[0].clientY);
-                    e.preventDefault();
+                    // 处理摇杆触摸
+                    if (joystickActive && joystickTouchId !== null) {
+                        for (let i = 0; i < e.touches.length; i++) {
+                            if (e.touches[i].identifier === joystickTouchId) {
+                                updateJoystickPosition(e.touches[i].clientX, e.touches[i].clientY);
+                                e.preventDefault();
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // 处理自动射击触摸
+                    if (autoShootTouchId !== null) {
+                        autoShoot = true;
+                        autoShootArea.classList.add('active');
+                    }
                 }
                 
                 function handleTouchEnd(e) {
-                    joystickActive = false;
-                    // 回到中心位置
-                    joystickHandleX = joystickCenterX;
-                    joystickHandleY = joystickCenterY;
-                    updateJoystickVisual();
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        const touch = e.changedTouches[i];
+                        
+                        // 释放摇杆
+                        if (touch.identifier === joystickTouchId) {
+                            joystickActive = false;
+                            joystickTouchId = null;
+                            joystickHandleX = joystickCenterX;
+                            joystickHandleY = joystickCenterY;
+                            updateJoystickVisual();
+                        }
+                        
+                        // 释放自动射击
+                        if (touch.identifier === autoShootTouchId) {
+                            autoShoot = false;
+                            autoShootTouchId = null;
+                            autoShootArea.classList.remove('active');
+                        }
+                    }
                     e.preventDefault();
                 }
                 
@@ -1036,35 +1106,14 @@
                     }
                     
                     updateJoystickVisual();
-                    updatePlayerMovement();
                 }
                 
                 function updateJoystickVisual() {
-                    const handleRect = joystickHandle.getBoundingClientRect();
                     const baseRect = joystickContainer.getBoundingClientRect();
-                    const x = joystickHandleX - baseRect.left - handleRect.width / 2;
-                    const y = joystickHandleY - baseRect.top - handleRect.height / 2;
+                    const x = joystickHandleX - baseRect.left - 40; // 40是手柄宽度的一半
+                    const y = joystickHandleY - baseRect.top - 40;  // 40是手柄高度的一半
                     
                     joystickHandle.style.transform = `translate(${x}px, ${y}px)`;
-                }
-                
-                function updatePlayerMovement() {
-                    if (!gameRunning) return;
-                    
-                    const dx = joystickHandleX - joystickCenterX;
-                    const dy = joystickHandleY - joystickCenterY;
-                    
-                    // 计算移动方向
-                    const moveX = dx / joystickRadius;
-                    const moveY = dy / joystickRadius;
-                    
-                    // 更新玩家位置
-                    player.x += moveX * player.speed;
-                    player.y += moveY * player.speed;
-                    
-                    // 边界检查
-                    player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
-                    player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
                 }
             }
             
@@ -1102,21 +1151,6 @@
                         e.preventDefault();
                     }
                 }, false);
-            }
-            
-            // ========== 自动射击按钮 ==========
-            function initAutoShootButton() {
-                if (!isMobile) return;
-                
-                autoShootArea.addEventListener('touchstart', function(e) {
-                    autoShoot = true;
-                    e.preventDefault();
-                }, {passive: false});
-                
-                autoShootArea.addEventListener('touchend', function(e) {
-                    autoShoot = false;
-                    e.preventDefault();
-                }, {passive: false});
             }
             
             // ========== 游戏时间限制 ==========
@@ -1341,8 +1375,7 @@
                 
                 // 初始化虚拟摇杆
                 if (isMobile) {
-                    initJoystick();
-                    initAutoShootButton();
+                    // 初始化会在游戏开始时调用
                 }
                 
                 // 初始化键盘控制（PC端）
@@ -1395,7 +1428,7 @@
                 
                 player = {
                     x: canvas.width / 2 - 30, y: canvas.height - 120,
-                    width: 60, height: 80, // 增加高度
+                    width: 60, height: 80,
                     speed: isMobile ? 6 : 7,
                     invincible: false,
                     invincibleTime: 0,
@@ -1408,7 +1441,7 @@
                 bullets = [];
                 props = [];
                 explosions = [];
-                keys = {}; // 重置按键状态
+                keys = {};
                 
                 // 更新UI
                 updateUI();
@@ -1715,10 +1748,10 @@
                 }
             }
             
-            // ========== 玩家移动控制 ==========
+            // ========== 玩家移动控制（修复版） ==========
             function updatePlayerMovement() {
                 // 虚拟摇杆控制（移动端）
-                if (joystickActive) {
+                if (joystickActive && gameRunning) {
                     const dx = joystickHandleX - joystickCenterX;
                     const dy = joystickHandleY - joystickCenterY;
                     
@@ -1858,35 +1891,29 @@
                 ctx.ellipse(centerX, player.y + player.height, glowSize/2, glowSize, 0, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // 飞船主体 - 更酷的三角形设计
+                // 飞船主体
                 ctx.shadowColor = COLORS.playerGlow;
                 ctx.shadowBlur = 25;
                 
-                // 主船体（蓝色渐变）
                 const bodyGradient = ctx.createLinearGradient(
                     player.x, player.y,
                     player.x, player.y + player.height
                 );
-                bodyGradient.addColorStop(0, '#99ccff'); // 亮蓝色
-                bodyGradient.addColorStop(0.5, '#6699ff'); // 蓝色
-                bodyGradient.addColorStop(1, '#3366ff'); // 深蓝色
+                bodyGradient.addColorStop(0, '#99ccff');
+                bodyGradient.addColorStop(0.5, '#6699ff');
+                bodyGradient.addColorStop(1, '#3366ff');
                 
                 ctx.fillStyle = bodyGradient;
                 ctx.beginPath();
-                // 船头（顶部尖角）
                 ctx.moveTo(centerX, player.y);
-                // 右上翼
                 ctx.lineTo(player.x + player.width * 0.9, player.y + player.height * 0.3);
-                // 船身右下
                 ctx.lineTo(player.x + player.width * 0.8, player.y + player.height);
-                // 船身左下
                 ctx.lineTo(player.x + player.width * 0.2, player.y + player.height);
-                // 左上翼
                 ctx.lineTo(player.x + player.width * 0.1, player.y + player.height * 0.3);
                 ctx.closePath();
                 ctx.fill();
                 
-                // 飞船驾驶舱（圆形）
+                // 飞船驾驶舱
                 const cockpitGradient = ctx.createRadialGradient(
                     centerX, player.y + player.height * 0.4,
                     0,
@@ -1906,15 +1933,12 @@
                 ctx.strokeStyle = '#FFFFFF';
                 ctx.lineWidth = 2;
                 
-                // 船身装饰线
                 ctx.beginPath();
                 ctx.moveTo(player.x + player.width * 0.3, player.y + player.height * 0.5);
                 ctx.lineTo(player.x + player.width * 0.7, player.y + player.height * 0.5);
                 ctx.stroke();
                 
-                // 机翼装饰
                 ctx.fillStyle = '#3366ff';
-                // 左机翼装饰
                 ctx.beginPath();
                 ctx.moveTo(player.x + player.width * 0.1, player.y + player.height * 0.3);
                 ctx.lineTo(player.x + player.width * 0.05, player.y + player.height * 0.4);
@@ -1922,7 +1946,6 @@
                 ctx.closePath();
                 ctx.fill();
                 
-                // 右机翼装饰
                 ctx.beginPath();
                 ctx.moveTo(player.x + player.width * 0.9, player.y + player.height * 0.3);
                 ctx.lineTo(player.x + player.width * 0.95, player.y + player.height * 0.4);
@@ -1930,20 +1953,15 @@
                 ctx.closePath();
                 ctx.fill();
                 
-                // 火力等级标识（改为在飞船两侧显示）
                 ctx.fillStyle = '#FFFFFF';
                 for (let i = 0; i < player.fireLevel; i++) {
-                    // 左侧火力标识
                     ctx.fillRect(player.x + 5, player.y + 15 + i * 12, 6, 8);
-                    // 右侧火力标识
                     ctx.fillRect(player.x + player.width - 11, player.y + 15 + i * 12, 6, 8);
                 }
                 
-                // 飞船轮廓（深色边框）
                 ctx.strokeStyle = '#3366ff';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
-                // 重新绘制轮廓
                 ctx.moveTo(centerX, player.y);
                 ctx.lineTo(player.x + player.width * 0.9, player.y + player.height * 0.3);
                 ctx.lineTo(player.x + player.width * 0.8, player.y + player.height);
@@ -1957,14 +1975,12 @@
             
             // ========== 绘制函数 ==========
             function drawBackground() {
-                // 背景渐变
                 const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
                 gradient.addColorStop(0, '#1a1a3f');
                 gradient.addColorStop(1, '#0a0a23');
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // 绘制星星
                 stars.forEach(star => {
                     star.y += star.speed;
                     if (star.y > canvas.height) {
@@ -1985,16 +2001,13 @@
                 enemies.forEach(enemy => {
                     ctx.save();
                     
-                    // 敌人发光效果
                     ctx.shadowColor = enemy.color;
                     ctx.shadowBlur = 20;
                     
-                    // 敌人闪烁效果
                     if (Math.sin(enemy.blink) > 0) {
                         ctx.globalAlpha = 0.8;
                     }
                     
-                    // 敌人主体
                     ctx.fillStyle = enemy.color;
                     ctx.beginPath();
                     ctx.ellipse(
@@ -2006,14 +2019,12 @@
                     );
                     ctx.fill();
                     
-                    // 眼睛
                     ctx.fillStyle = '#FFFFFF';
                     ctx.beginPath();
                     ctx.arc(enemy.x + enemy.width/3, enemy.y + enemy.height/3, 6, 0, Math.PI * 2);
                     ctx.arc(enemy.x + enemy.width*2/3, enemy.y + enemy.height/3, 6, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // 嘴巴
                     ctx.strokeStyle = '#FFFFFF';
                     ctx.lineWidth = 3;
                     ctx.beginPath();
@@ -2028,7 +2039,6 @@
                 bullets.forEach(bullet => {
                     ctx.save();
                     
-                    // 子弹发光效果
                     ctx.shadowColor = COLORS.bullet;
                     ctx.shadowBlur = 15;
                     
@@ -2043,7 +2053,6 @@
                     );
                     ctx.fill();
                     
-                    // 子弹尾迹
                     const gradient = ctx.createLinearGradient(
                         bullet.x + bullet.width/2, bullet.y,
                         bullet.x + bullet.width/2, bullet.y + bullet.height + 10
@@ -2062,21 +2071,17 @@
                 props.forEach(prop => {
                     ctx.save();
                     
-                    // 道具旋转
                     ctx.translate(prop.x + prop.width/2, prop.y + prop.height/2);
                     ctx.rotate(prop.rotation);
                     
-                    // 道具发光效果
                     ctx.shadowColor = prop.color;
                     ctx.shadowBlur = 20;
                     
-                    // 道具主体
                     ctx.fillStyle = prop.color;
                     ctx.beginPath();
                     ctx.ellipse(0, 0, prop.width/2, prop.height/2, 0, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // 道具图标
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = '20px Arial';
                     ctx.textAlign = 'center';
@@ -2094,18 +2099,15 @@
                     
                     ctx.save();
                     
-                    // 爆炸发光效果
                     ctx.shadowColor = explosion.color;
                     ctx.shadowBlur = 40;
                     
-                    // 爆炸核心
                     ctx.fillStyle = explosion.color;
                     ctx.globalAlpha = alpha;
                     ctx.beginPath();
                     ctx.arc(explosion.x, explosion.y, radius/2, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // 爆炸粒子
                     for (let i = 0; i < 8; i++) {
                         const angle = (i / 8) * Math.PI * 2;
                         const x = explosion.x + Math.cos(angle) * radius;
@@ -2124,13 +2126,10 @@
             function gameLoop() {
                 if (!gameLoopRunning) return;
                 
-                // 清空画布
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
-                // 绘制背景
                 drawBackground();
                 
-                // 更新游戏状态
                 updatePlayer();
                 updateBullets();
                 updateEnemies();
@@ -2138,21 +2137,18 @@
                 updateExplosions();
                 checkStageProgress();
                 
-                // 绘制游戏元素
                 drawEnemies();
                 drawBullets();
                 drawProps();
                 drawExplosions();
                 drawPlayer();
                 
-                // 继续游戏循环
                 requestAnimationFrame(gameLoop);
             }
             
             // ========== 初始化游戏 ==========
             initGame();
             
-            // 初始调整画布大小（延迟确保DOM已加载）
             setTimeout(() => {
                 if (gameContainer.style.display !== 'none') {
                     resizeCanvas();
