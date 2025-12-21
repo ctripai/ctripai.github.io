@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>飞机大战H5</title>
+    <title>太空飞机大战</title>
     <style>
         * {
             margin: 0;
@@ -14,9 +14,9 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             color: #fff;
-            background: url('https://picsum.photos/id/1023/1920/1080') center/cover no-repeat;
+            background: linear-gradient(135deg, #0a0a23 0%, #1a1a3f 100%);
             overflow: hidden;
             height: 100vh;
             width: 100vw;
@@ -32,7 +32,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.9);
+            background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 50, 100, 0.8));
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -43,82 +43,106 @@
         }
 
         .start-screen h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            text-shadow: 0 0 15px #00ffcc;
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px #00ffcc, 0 0 30px #00ffcc;
             color: #00ffcc;
+            animation: pulse 2s infinite;
         }
 
-        .history-score {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            padding: 15px 30px;
-            background: rgba(0, 50, 100, 0.7);
+        @keyframes pulse {
+            0% { transform: scale(1); text-shadow: 0 0 20px #00ffcc, 0 0 30px #00ffcc; }
+            50% { transform: scale(1.05); text-shadow: 0 0 30px #00ffcc, 0 0 40px #00ffcc; }
+            100% { transform: scale(1); text-shadow: 0 0 20px #00ffcc, 0 0 30px #00ffcc; }
+        }
+
+        .game-story {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            padding: 15px 25px;
+            background: rgba(0, 100, 200, 0.3);
             border-radius: 10px;
-            border: 1px solid #00ffcc;
+            border: 1px solid #00ccff;
+            line-height: 1.5;
+            max-width: 600px;
         }
 
-        .level-info {
+        .history-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .stat-item {
+            padding: 10px 20px;
+            background: rgba(0, 50, 100, 0.6);
+            border-radius: 8px;
+            border: 1px solid #00ffcc;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            color: #ffff00;
+            font-weight: bold;
+            font-size: 1.3rem;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        .controls-info {
             font-size: 1rem;
             margin-bottom: 30px;
-            color: #ffff00;
-            text-shadow: 0 0 8px #ffff00;
-        }
-
-        .difficulty-select {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .difficulty-btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            background: #0099aa;
-            color: white;
-            transition: all 0.3s;
-        }
-
-        .difficulty-btn.active {
-            background: #00ffcc;
-            box-shadow: 0 0 10px #00ffcc;
+            color: #00ffcc;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            max-width: 600px;
+            line-height: 1.6;
         }
 
         .sound-toggle {
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             border: 2px solid #00ffcc;
             background: rgba(0, 0, 0, 0.8);
             color: #00ffcc;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 101;
+            transition: all 0.3s;
+        }
+
+        .sound-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #00ffcc;
         }
 
         .main-start-btn {
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            background: linear-gradient(#00ffcc, #0099aa);
+            padding: 18px 50px;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #00ffcc, #0099ff);
             color: white;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.6);
             transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
         }
 
         .main-start-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.8);
+            transform: scale(1.15);
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.9);
+            background: linear-gradient(45deg, #00ffcc, #0066ff);
         }
 
         /* 游戏容器 */
@@ -132,7 +156,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.5);
             padding: 0;
             margin: 0;
         }
@@ -141,42 +165,128 @@
         .game-info {
             display: flex;
             justify-content: space-between;
-            width: 90%;
-            max-width: 600px;
-            margin: 10px auto;
-            font-size: 1.2rem;
+            width: 95%;
+            max-width: 800px;
+            margin: 15px auto;
+            font-size: 1.3rem;
             text-shadow: 0 0 5px #00ff00;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 8px 20px;
-            border-radius: 10px;
-            border: 1px solid #00ff00;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 12px 25px;
+            border-radius: 15px;
+            border: 2px solid #00ff00;
             position: relative;
             z-index: 10;
+            font-weight: bold;
+        }
+
+        .game-info .stage {
+            color: #ff66ff;
+            text-shadow: 0 0 8px #ff66ff;
         }
 
         .game-info .level {
             color: #ffcc00;
-            text-shadow: 0 0 5px #ffcc00;
+            text-shadow: 0 0 8px #ffcc00;
         }
 
         .game-info .props-count {
             color: #00ccff;
-            text-shadow: 0 0 5px #00ccff;
+            text-shadow: 0 0 8px #00ccff;
         }
 
         /* 画布样式 */
         canvas {
-            border: 2px solid #33ff33;
-            background: #0a0a0a;
-            border-radius: 0;
+            border: 3px solid #33ff33;
+            background: #0a0a23;
+            border-radius: 5px;
             width: 100vw;
-            height: calc(100vh - 50px);
+            height: calc(100vh - 70px);
             max-width: none;
             max-height: none;
             object-fit: cover;
             margin: 0;
             padding: 0;
             display: block;
+            box-shadow: 0 0 20px rgba(51, 255, 51, 0.3);
+        }
+
+        /* 关卡提示 */
+        .stage-notice {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(0, 50, 100, 0.95));
+            padding: 40px 30px;
+            border-radius: 15px;
+            border: 3px solid #00ffcc;
+            width: 90%;
+            max-width: 500px;
+            z-index: 25;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translate(-50%, -40%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        .stage-notice h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #00ffcc;
+            text-shadow: 0 0 15px #00ffcc;
+            animation: colorShift 3s infinite;
+        }
+
+        @keyframes colorShift {
+            0%, 100% { color: #00ffcc; }
+            50% { color: #00ff99; }
+        }
+
+        .stage-notice p {
+            margin: 10px 0;
+            font-size: 1.2rem;
+        }
+
+        .stage-notice .stage-desc {
+            color: #ffff00;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .stage-notice .boss-warning {
+            color: #ff4444;
+            font-size: 1.4rem;
+            text-shadow: 0 0 10px #ff4444;
+            margin: 20px 0;
+            animation: warningPulse 1s infinite;
+        }
+
+        @keyframes warningPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .stage-continue-btn {
+            padding: 12px 40px;
+            font-size: 1.3rem;
+            background: linear-gradient(45deg, #ff9800, #ff5500);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.7);
+            transition: all 0.3s;
+            margin-top: 25px;
+            font-weight: bold;
+        }
+
+        .stage-continue-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.9);
         }
 
         /* 游戏结束弹窗 */
@@ -187,87 +297,111 @@
             transform: translate(-50%, -50%);
             text-align: center;
             display: none;
-            background: rgba(0, 0, 0, 0.95);
-            padding: 40px 20px;
-            border-radius: 10px;
-            border: 2px solid #ff4444;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(100, 0, 0, 0.95));
+            padding: 50px 30px;
+            border-radius: 15px;
+            border: 3px solid #ff4444;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
             z-index: 20;
+            animation: slideIn 0.5s ease-out;
         }
 
         .game-over h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
+            font-size: 2.8rem;
+            margin-bottom: 25px;
             color: #ff4444;
-            text-shadow: 0 0 10px #ff4444;
+            text-shadow: 0 0 15px #ff4444;
         }
 
         .game-over p {
-            margin: 10px 0;
-        }
-
-        .game-over .max-level {
-            color: #ffcc00;
-        }
-
-        .restart-btn {
-            padding: 10px 30px;
+            margin: 15px 0;
             font-size: 1.2rem;
-            background: linear-gradient(#ff9800, #e68900);
+        }
+
+        .game-over .final-stats {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #ffcc00;
+        }
+
+        .game-over .max-stage {
+            color: #ffcc00;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .game-over .restart-btn {
+            padding: 15px 50px;
+            font-size: 1.4rem;
+            background: linear-gradient(45deg, #ff9800, #e68900);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.6);
             transition: all 0.3s;
-            margin-top: 20px;
+            margin-top: 25px;
+            font-weight: bold;
         }
 
-        .restart-btn:hover {
-            background: linear-gradient(#e68900, #cc7a00);
-            transform: scale(1.05);
+        .game-over .restart-btn:hover {
+            background: linear-gradient(45deg, #e68900, #cc7a00);
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 152, 0, 0.8);
         }
 
         /* 道具提示 */
         .prop-tip {
             position: absolute;
-            padding: 5px 10px;
-            background: rgba(255, 255, 0, 0.9);
+            padding: 8px 15px;
+            background: rgba(255, 255, 0, 0.95);
             color: #000;
-            border-radius: 5px;
-            font-size: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
             z-index: 15;
-            animation: fadeOut 1s ease-out forwards;
+            animation: fadeOut 1.5s ease-out forwards;
+            border: 2px solid #ff9900;
+            box-shadow: 0 0 10px rgba(255, 153, 0, 0.5);
         }
 
-        /* 道具快捷使用按钮（移动端） */
+        /* 道具快捷使用按钮 */
         .prop-use-btn {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            border: 2px solid #ffcc00;
-            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #ffcc00;
+            background: rgba(0, 0, 0, 0.9);
             color: #ffcc00;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 15;
             display: none;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
         }
 
         .prop-use-btn.show {
             display: flex;
         }
 
+        .prop-use-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.8);
+        }
+
         @keyframes fadeOut {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-20px); }
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-30px) scale(0.9); }
         }
 
         /* 隐藏无用元素 */
@@ -278,31 +412,52 @@
         /* 响应式调整 */
         @media (max-width: 768px) {
             .start-screen h1 {
-                font-size: 2rem;
+                font-size: 2.5rem;
+            }
+
+            .game-story, .controls-info {
+                font-size: 1rem;
+                padding: 12px;
+                margin-bottom: 20px;
+            }
+
+            .history-stats {
+                flex-direction: column;
+                gap: 10px;
             }
 
             .game-info {
                 font-size: 1rem;
-                padding: 6px 15px;
-                margin: 5px auto;
-                width: 95%;
+                padding: 10px 15px;
+                margin: 10px auto;
+                width: 98%;
             }
 
             canvas {
-                height: calc(100vh - 40px);
-                border-width: 1px;
+                height: calc(100vh - 60px);
+                border-width: 2px;
+            }
+
+            .stage-notice h2 {
+                font-size: 2rem;
+            }
+
+            .stage-notice p {
+                font-size: 1rem;
             }
 
             .prop-use-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+                bottom: 20px;
+                right: 20px;
             }
 
             .sound-toggle {
-                width: 35px;
-                height: 35px;
-                font-size: 1rem;
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
             }
         }
 
@@ -321,7 +476,7 @@
             }
 
             .game-info {
-                margin-top: env(safe-area-inset-top) + 5px;
+                margin-top: calc(env(safe-area-inset-top) + 10px);
             }
         }
     </style>
@@ -331,40 +486,66 @@
     <div class="start-screen" id="startScreen">
         <div class="sound-toggle" id="soundToggle">🔊</div>
         <h1>太空飞机大战</h1>
-        <div class="history-score">
-            历史最高分：<span id="historyScore">0</span>
+        
+        <div class="game-story">
+            地球危机！外星舰队入侵！你被选中驾驶最先进的太空战机，<br>
+            从地球轨道一路杀向敌方母舰。击退一波波敌人，闯过重重关卡，<br>
+            每5关面对强大BOSS，收集能量道具增强火力，保卫家园！
         </div>
-        <div class="difficulty-select">
-            <button class="difficulty-btn active" data-level="easy">简单</button>
-            <button class="difficulty-btn" data-level="medium">中等</button>
-            <button class="difficulty-btn" data-level="hard">困难</button>
+        
+        <div class="history-stats">
+            <div class="stat-item">最高关卡<br><span class="stat-value" id="historyStage">1</span></div>
+            <div class="stat-item">最高分数<br><span class="stat-value" id="historyScore">0</span></div>
+            <div class="stat-item">击毁敌机<br><span class="stat-value" id="historyKills">0</span></div>
         </div>
-        <div class="level-info">
-            挑战更高等级，击败BOSS！<br>收集道具，助力通关！
+        
+        <div class="controls-info">
+            <strong>🎮 游戏控制：</strong><br>
+            PC：WASD/方向键移动，空格射击，B键使用炸弹<br>
+            手机：触摸移动，自动射击，右下角按钮使用道具
         </div>
-        <button class="main-start-btn" id="mainStartBtn">开始游戏</button>
+        
+        <button class="main-start-btn" id="mainStartBtn">开始任务</button>
     </div>
 
     <!-- 游戏容器 -->
     <div class="game-container">
         <div class="game-info">
             <span>分数: <span id="score">0</span></span>
+            <span class="stage">关卡: <span id="stage">1</span></span>
             <span class="level">等级: <span id="level">1</span></span>
             <span class="props-count">道具: <span id="propsCount">0</span></span>
             <span>生命: <span id="life">3</span></span>
         </div>
         <canvas id="gameCanvas" width="device-width" height="device-height"></canvas>
+        
         <!-- 道具使用按钮 -->
         <div class="prop-use-btn" id="propUseBtn">💥</div>
+        
+        <!-- 关卡提示 -->
+        <div class="stage-notice" id="stageNotice">
+            <h2>关卡 <span id="stageNumber">1</span></h2>
+            <div class="stage-desc" id="stageDesc">初始训练关 - 熟悉操作</div>
+            <p>目标分数：<span id="stageTarget">200</span></p>
+            <p>敌人波次：<span id="stageWaves">3</span></p>
+            <div id="bossWarning" class="boss-warning" style="display:none;">⚠️ BOSS警报！准备迎战！</div>
+            <button class="stage-continue-btn" id="stageContinueBtn">继续战斗</button>
+        </div>
+        
+        <!-- 游戏结束弹窗 -->
         <div class="game-over" id="gameOver">
-            <h2>游戏结束</h2>
-            <p>最终分数: <span id="finalScore">0</span></p>
-            <p>最高等级: <span id="finalLevel" class="max-level">1</span></p>
+            <h2>任务失败</h2>
+            <p>你的战机已被击毁</p>
+            <div class="final-stats">
+                <p>最终分数: <span id="finalScore">0</span></p>
+                <p>最高关卡: <span class="max-stage"><span id="finalStage">1</span></span></p>
+                <p>击毁敌机: <span id="finalKills">0</span></p>
+            </div>
             <button class="restart-btn" id="restartBtn">重新开始</button>
         </div>
     </div>
 
-    <!-- 替换为稳定的音频资源 -->
+    <!-- 音频资源 -->
     <audio id="bgMusic" loop preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-tech-house-vibes-130.mp3" type="audio/mpeg">
     </audio>
@@ -383,9 +564,14 @@
     <audio id="gameOverSound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-video-game-defeat-2042.mp3" type="audio/mpeg">
     </audio>
+    <audio id="stageCompleteSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bossSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
-        // 等待DOM完全加载后执行
         document.addEventListener('DOMContentLoaded', function() {
             // 获取DOM元素
             const canvas = document.getElementById('gameCanvas');
@@ -394,16 +580,27 @@
             const mainStartBtn = document.getElementById('mainStartBtn');
             const restartBtn = document.getElementById('restartBtn');
             const gameOver = document.getElementById('gameOver');
+            const stageNotice = document.getElementById('stageNotice');
+            const stageContinueBtn = document.getElementById('stageContinueBtn');
+            
             const scoreElement = document.getElementById('score');
             const lifeElement = document.getElementById('life');
             const levelElement = document.getElementById('level');
-            const finalScoreElement = document.getElementById('finalScore');
-            const finalLevelElement = document.getElementById('finalLevel');
-            const historyScoreElement = document.getElementById('historyScore');
+            const stageElement = document.getElementById('stage');
             const propsCountElement = document.getElementById('propsCount');
+            const finalScoreElement = document.getElementById('finalScore');
+            const finalStageElement = document.getElementById('finalStage');
+            const finalKillsElement = document.getElementById('finalKills');
+            const historyScoreElement = document.getElementById('historyScore');
+            const historyStageElement = document.getElementById('historyStage');
+            const historyKillsElement = document.getElementById('historyKills');
             const propUseBtn = document.getElementById('propUseBtn');
-            const difficultyBtns = document.querySelectorAll('.difficulty-btn');
             const soundToggle = document.getElementById('soundToggle');
+            const stageNumberElement = document.getElementById('stageNumber');
+            const stageDescElement = document.getElementById('stageDesc');
+            const stageTargetElement = document.getElementById('stageTarget');
+            const stageWavesElement = document.getElementById('stageWaves');
+            const bossWarningElement = document.getElementById('bossWarning');
 
             // 音频元素
             const bgMusic = document.getElementById('bgMusic');
@@ -412,21 +609,24 @@
             const propSound = document.getElementById('propSound');
             const levelUpSound = document.getElementById('levelUpSound');
             const gameOverSound = document.getElementById('gameOverSound');
+            const stageCompleteSound = document.getElementById('stageCompleteSound');
+            const bossSound = document.getElementById('bossSound');
 
-            // 音效开关状态
+            // 音效开关
             let soundOn = true;
-            // 记录用户是否有过交互（解决浏览器自动播放策略）
             let userInteracted = false;
 
-            // 初始化音频音量
+            // 初始化音频
             bgMusic.volume = 0.3;
             shootSound.volume = 0.2;
             explosionSound.volume = 0.4;
             propSound.volume = 0.5;
             levelUpSound.volume = 0.5;
             gameOverSound.volume = 0.5;
+            stageCompleteSound.volume = 0.6;
+            bossSound.volume = 0.6;
 
-            // 监听用户交互（点击/触摸）
+            // 用户交互监听
             document.addEventListener('click', () => {
                 userInteracted = true;
             }, { once: true });
@@ -434,21 +634,10 @@
                 userInteracted = true;
             }, { once: true });
 
-            // 音频加载检测
-            const audioElements = [bgMusic, shootSound, explosionSound, propSound, levelUpSound, gameOverSound];
-            audioElements.forEach(audio => {
-                audio.addEventListener('error', (e) => {
-                    console.error(`音频加载失败: ${audio.src}，错误类型: ${e.target.error.code}`);
-                });
-                audio.load();
-            });
-
-            // 音效开关点击事件
+            // 音效开关
             soundToggle.addEventListener('click', () => {
                 soundOn = !soundOn;
                 soundToggle.textContent = soundOn ? '🔊' : '🔇';
-                
-                // 控制背景音乐播放/暂停
                 if (soundOn && gameRunning && userInteracted) {
                     bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
                 } else {
@@ -456,28 +645,21 @@
                 }
             });
 
-            // 播放音效函数（修复连续播放和用户交互问题）
+            // 播放音效函数
             function playSound(audio) {
                 if (!soundOn || !userInteracted) return;
-
                 try {
-                    // 克隆音频元素解决连续播放问题
                     const audioClone = audio.cloneNode();
                     audioClone.volume = audio.volume;
                     audioClone.play().then(() => {
-                        // 播放完成后移除克隆元素
-                        audioClone.addEventListener('ended', () => {
-                            audioClone.remove();
-                        });
-                    }).catch(e => {
-                        console.log('音效播放失败:', e);
-                    });
+                        audioClone.addEventListener('ended', () => audioClone.remove());
+                    }).catch(e => console.log('音效播放失败:', e));
                 } catch (err) {
                     console.error('音效播放异常:', err);
                 }
             }
 
-            // Web Audio API 兜底（音频资源失效时使用）
+            // Web Audio API 兜底
             let audioContext;
             function initAudioContext() {
                 try {
@@ -496,15 +678,12 @@
                 oscillator.frequency.value = freq;
                 gainNode.gain.value = 0.1;
                 oscillator.start();
-                setTimeout(() => {
-                    oscillator.stop();
-                }, duration);
+                setTimeout(() => oscillator.stop(), duration);
             }
 
-            // 初始化音频上下文
             initAudioContext();
 
-            // 适配画布尺寸
+            // 画布适配
             function resizeCanvas() {
                 const rect = canvas.getBoundingClientRect();
                 canvas.width = rect.width;
@@ -517,88 +696,39 @@
 
             // 本地存储
             let historyScore = localStorage.getItem('planeGameHighScore') || 0;
-            let historyMaxLevel = localStorage.getItem('planeGameMaxLevel') || 1;
+            let historyMaxStage = localStorage.getItem('planeGameMaxStage') || 1;
+            let historyTotalKills = localStorage.getItem('planeGameTotalKills') || 0;
             historyScoreElement.textContent = historyScore;
+            historyStageElement.textContent = historyMaxStage;
+            historyKillsElement.textContent = historyTotalKills;
 
-            // 难度选择
-            let selectedDifficulty = 'easy';
-            difficultyBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    difficultyBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    selectedDifficulty = btn.dataset.level;
-                });
-            });
-
-            // 难度曲线配置（根据选择的难度调整系数）- 修正了速度增长系数
-            const getDifficultyConfig = (diff) => {
-                const baseConfig = {
-                    // 敌机生成间隔的最小值和最大值
-                    spawnRate: { min: 5, max: 60 },
-                    // 敌机速度的基础增长系数
-                    enemySpeedFactor: 0.001,
-                    // 快速敌机速度系数：大幅降低
-                    fastEnemySpeedFactor: 0.0001,
-                    // 敌机血量的基础增长系数
-                    enemyHpFactor: 0.002,
-                    // BOSS血量增长系数
-                    bossHpFactor: 15,
-                    // BOSS弹幕速度增长系数
-                    bossBulletSpeedFactor: 0.05,
-                    // 等级提升的基础分数和增长系数
-                    levelUpBase: 200,
-                    levelUpFactor: 50,
-                    // 道具掉落概率的基础值和难度补偿
-                    propDropRate: { base: 0.2, difficultyCompensate: 0.00005 },
-                    // 敌机出界扣血概率
-                    loseLifeProbFactor: 0.1
-                };
-
-                // 根据难度调整系数
-                switch (diff) {
-                    case 'medium':
-                        return {
-                            ...baseConfig,
-                            enemySpeedFactor: 0.0015,
-                            fastEnemySpeedFactor: 0.00015,  // 修正：从 0.00075 降低到 0.00015
-                            enemyHpFactor: 0.0025,
-                            bossHpFactor: 20,
-                            bossBulletSpeedFactor: 0.06,
-                            levelUpFactor: 60,
-                            propDropRate: { base: 0.18, difficultyCompensate: 0.00004 }
-                        };
-                    case 'hard':
-                        return {
-                            ...baseConfig,
-                            enemySpeedFactor: 0.002,
-                            fastEnemySpeedFactor: 0.0002,   // 修正：从 0.001 降低到 0.0002
-                            enemyHpFactor: 0.003,
-                            bossHpFactor: 25,
-                            bossBulletSpeedFactor: 0.07,
-                            levelUpFactor: 70,
-                            propDropRate: { base: 0.15, difficultyCompensate: 0.00003 },
-                            spawnRate: { min: 3, max: 50 }
-                        };
-                    default: // easy
-                        return baseConfig;
-                }
-            };
-
-            // 游戏核心参数
+            // 游戏核心参数 - 关卡系统
             let gameRunning = false;
             let score = 0;
             let life = 3;
-            let level = 1;
-            let maxLevel = 1;
+            let level = 1; // 等级（经验值）
+            let stage = 1; // 关卡
+            let maxStage = 1;
+            let totalKills = 0;
+            let currentWave = 0;
+            let wavesInStage = 3;
+            let stageTargetScore = 0;
+            let stageScore = 0;
+            let stageCompleted = false;
+            
             let explosions = [];
             let lastShotTime = 0;
             const SHOOT_INTERVAL_PC = 200;
             const SHOOT_INTERVAL_MOBILE = 50;
             let autoShoot = false;
             let lastAutoShootTime = 0;
-            let propsInventory = []; // 道具背包
-            let propsCount = 0; // 道具数量
-            let DIFFICULTY_CONFIG = getDifficultyConfig(selectedDifficulty);
+            let propsInventory = [];
+            let propsCount = 0;
+            let enemySpawnTimer = 0;
+            let bossSpawned = false;
+            let enemiesInCurrentWave = 0;
+            let enemiesToSpawn = 0;
+            let waveSpawning = false;
 
             // 玩家飞机
             let player = {
@@ -607,13 +737,13 @@
                 width: 50,
                 height: 50,
                 speed: 5,
-                baseSpeed: 5, // 基础速度
+                baseSpeed: 5,
                 invincible: false,
-                fireLevel: 1, // 火力等级
-                shield: false, // 护盾
-                shieldTime: 0, // 护盾剩余时间
-                speedBoost: false, // 速度加成
-                speedBoostTime: 0, // 速度加成剩余时间
+                fireLevel: 1,
+                shield: false,
+                shieldTime: 0,
+                speedBoost: false,
+                speedBoostTime: 0,
                 superBullet: false,
                 superBulletTime: 0,
                 invincibleTime: 0,
@@ -624,34 +754,25 @@
             // 敌机类型
             const ENEMY_TYPES = {
                 NORMAL: { color: '#e74c3c', hp: 1, speed: 2, size: 40, score: 10 },
-                FAST: { color: '#3498db', hp: 1, speed: 4, size: 30, score: 15 }, // 修正：基础速度从5降低到4
-                ARMORED: { color: '#9b59b6', hp: 3, speed: 1, size: 50, score: 30 },
-                BOSS: { color: '#ff0000', hp: 50, speed: 0.8, size: 100, score: 100 }
+                FAST: { color: '#3498db', hp: 1, speed: 3, size: 30, score: 15 },
+                ARMORED: { color: '#9b59b6', hp: 2, speed: 1.5, size: 50, score: 30 },
+                BOSS: { color: '#ff0000', hp: 80, speed: 0.8, size: 120, score: 200 }
             };
 
             // 道具类型
             const PROP_TYPES = {
-                FIRE: { color: '#ff9800', size: 20, effect: 'fire', icon: '🔥' },
-                LIFE: { color: '#2ecc71', size: 20, effect: 'life', icon: '❤️' },
-                SHIELD: { color: '#3498db', size: 20, effect: 'shield', icon: '🛡️' },
-                CLEAR: { color: '#9b59b6', size: 20, effect: 'clear', icon: '🧹' },
-                SUPER_BULLET: { color: '#ff3366', size: 20, effect: 'superBullet', icon: '💥' },
-                SPEED_BOOST: { color: '#00ccff', size: 20, effect: 'speedBoost', icon: '⚡' },
-                INVINCIBLE: { color: '#cc00ff', size: 20, effect: 'invincible', icon: '☁️' },
-                BOMB: { color: '#ff0000', size: 20, effect: 'bomb', icon: '💣' },
-                SCORE_DOUBLE: { color: '#ffff00', size: 20, effect: 'scoreDouble', icon: '✖2' },
-                LIFE_SHIELD: { color: '#00ff99', size: 20, effect: 'lifeShield', icon: '🛡️+' },
-                PENETRATE: { color: '#6600ff', size: 20, effect: 'penetrate', icon: '➡️' },
-                WINGMAN: { color: '#ff9900', size: 20, effect: 'wingman', icon: '✈️' }
+                FIRE: { color: '#ff9800', size: 20, effect: 'fire', icon: '🔥', desc: '火力提升' },
+                LIFE: { color: '#2ecc71', size: 20, effect: 'life', icon: '❤️', desc: '生命+1' },
+                SHIELD: { color: '#3498db', size: 20, effect: 'shield', icon: '🛡️', desc: '能量护盾' },
+                CLEAR: { color: '#9b59b6', size: 20, effect: 'clear', icon: '🧹', desc: '全屏清敌' },
+                SUPER_BULLET: { color: '#ff3366', size: 20, effect: 'superBullet', icon: '💥', desc: '超级子弹' },
+                BOMB: { color: '#ff0000', size: 20, effect: 'bomb', icon: '💣', desc: '战术炸弹' }
             };
 
             let bullets = [];
             let enemies = [];
             let props = [];
             let enemyBullets = [];
-            let wingmen = [];
-            let enemySpawnTimer = 0;
-            let bossSpawned = false;
             let keys = {};
             let scoreDouble = false;
             let scoreDoubleTime = 0;
@@ -659,15 +780,142 @@
             let penetrateTime = 0;
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-            // 监听事件
+            // 关卡配置
+            const STAGE_CONFIG = {
+                1: { name: "训练关", waves: 3, target: 200, enemyTypes: ['NORMAL'], boss: false },
+                2: { name: "太空航道", waves: 4, target: 500, enemyTypes: ['NORMAL', 'FAST'], boss: false },
+                3: { name: "小行星带", waves: 4, target: 800, enemyTypes: ['NORMAL', 'FAST', 'ARMORED'], boss: false },
+                4: { name: "敌前哨站", waves: 5, target: 1200, enemyTypes: ['FAST', 'ARMORED'], boss: false },
+                5: { name: "BOSS:侦察母舰", waves: 1, target: 1500, enemyTypes: ['BOSS'], boss: true },
+                6: { name: "深空追击", waves: 5, target: 2000, enemyTypes: ['NORMAL', 'FAST', 'ARMORED'], boss: false },
+                7: { name: "敌方舰队", waves: 6, target: 2500, enemyTypes: ['FAST', 'ARMORED'], boss: false },
+                8: { name: "星云战场", waves: 6, target: 3000, enemyTypes: ['NORMAL', 'FAST', 'ARMORED'], boss: false },
+                9: { name: "虫洞防御", waves: 7, target: 3500, enemyTypes: ['FAST', 'ARMORED'], boss: false },
+                10: { name: "BOSS:战列舰", waves: 1, target: 4000, enemyTypes: ['BOSS'], boss: true }
+            };
+
+            // 难度系数（随关卡提升）
+            function getStageDifficulty(stageNum) {
+                const baseDifficulty = 0.001;
+                const stageFactor = Math.min((stageNum - 1) * 0.0002, 0.0015);
+                const speedMultiplier = 1 + (stageNum - 1) * 0.1;
+                const hpMultiplier = 1 + (stageNum - 1) * 0.2;
+                
+                return {
+                    spawnRate: { min: 4, max: 60 - Math.min(stageNum * 3, 30) },
+                    enemySpeedFactor: baseDifficulty + stageFactor,
+                    enemyHpFactor: 0.002,
+                    bossHpFactor: 15 + (stageNum * 3),
+                    bossBulletSpeedFactor: 0.05 + (stageNum * 0.01),
+                    levelUpBase: 200 + (stageNum * 20),
+                    levelUpFactor: 50 + (stageNum * 5),
+                    propDropRate: { base: 0.2 - (stageNum * 0.01), difficultyCompensate: 0.00005 },
+                    speedMultiplier: speedMultiplier,
+                    hpMultiplier: hpMultiplier
+                };
+            }
+
+            let DIFFICULTY_CONFIG = getStageDifficulty(stage);
+
+            // 显示关卡提示
+            function showStageNotice() {
+                gameRunning = false;
+                stageNumberElement.textContent = stage;
+                const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
+                stageDescElement.textContent = config.name;
+                stageTargetElement.textContent = config.target;
+                stageWavesElement.textContent = config.waves;
+                bossWarningElement.style.display = config.boss ? 'block' : 'none';
+                if (config.boss) {
+                    playSound(bossSound);
+                    playBeep(300, 200);
+                }
+                stageNotice.style.display = 'block';
+            }
+
+            // 开始新关卡
+            function startNewStage() {
+                const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
+                wavesInStage = config.waves;
+                stageTargetScore = config.target;
+                stageScore = 0;
+                currentWave = 0;
+                enemiesInCurrentWave = 0;
+                enemiesToSpawn = 0;
+                waveSpawning = false;
+                stageCompleted = false;
+                bossSpawned = false;
+                
+                // 更新难度
+                DIFFICULTY_CONFIG = getStageDifficulty(stage);
+                
+                // 显示关卡信息
+                stageElement.textContent = stage;
+                
+                // 开始第一波
+                startNextWave();
+            }
+
+            // 开始下一波敌人
+            function startNextWave() {
+                if (currentWave < wavesInStage) {
+                    currentWave++;
+                    const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
+                    const waveMultiplier = 1 + (currentWave - 1) * 0.3;
+                    
+                    // 每波敌人数增加
+                    enemiesToSpawn = 5 + Math.floor(currentWave * 2 * waveMultiplier);
+                    enemiesInCurrentWave = 0;
+                    waveSpawning = true;
+                    
+                    showPropTip(canvas.width/2, canvas.height/2, `第 ${currentWave}/${wavesInStage} 波敌人`);
+                }
+            }
+
+            // 检查关卡完成
+            function checkStageComplete() {
+                if (!stageCompleted && stageScore >= stageTargetScore && enemies.length === 0 && !waveSpawning) {
+                    stageCompleted = true;
+                    
+                    // 关卡完成奖励
+                    const stageBonus = stage * 100;
+                    score += stageBonus;
+                    scoreElement.textContent = score;
+                    
+                    // 播放完成音效
+                    playSound(stageCompleteSound);
+                    playBeep(800, 300);
+                    
+                    // 显示完成提示
+                    showPropTip(canvas.width/2, canvas.height/2, `关卡${stage}完成！奖励${stageBonus}分`);
+                    
+                    // 准备下一关
+                    setTimeout(() => {
+                        stage++;
+                        maxStage = Math.max(maxStage, stage);
+                        showStageNotice();
+                    }, 1500);
+                }
+            }
+
+            // 事件监听
             window.addEventListener('resize', resizeCanvas);
+            
+            // 键盘事件监听 - 修复：确保全局监听
             document.addEventListener('keydown', (e) => {
                 keys[e.key] = true;
+                // 防止空格键滚动页面
+                if (e.key === ' ' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                }
                 if (e.key === 'b' && propsInventory.length > 0) {
                     useStoredProp();
                 }
             });
-            document.addEventListener('keyup', (e) => keys[e.key] = false);
+            
+            document.addEventListener('keyup', (e) => {
+                keys[e.key] = false;
+            });
 
             // 触摸移动
             canvas.addEventListener('touchmove', (e) => {
@@ -681,8 +929,17 @@
                 player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
             });
 
-            // 道具使用按钮点击事件
+            // 道具使用按钮
             propUseBtn.addEventListener('click', useStoredProp);
+
+            // 关卡继续按钮 - 修复：启动游戏循环
+            stageContinueBtn.addEventListener('click', () => {
+                stageNotice.style.display = 'none';
+                gameRunning = true;
+                startNewStage();
+                // 修复：启动游戏循环
+                requestAnimationFrame(gameLoop);
+            });
 
             // 绘制玩家飞机
             function drawPlayer() {
@@ -696,7 +953,6 @@
                     ctx.beginPath();
                     ctx.arc(player.x + player.width/2, player.y + player.height/2, player.width/2 + 5, 0, Math.PI * 2);
                     ctx.stroke();
-                    ctx.globalAlpha = 0.8;
                 }
 
                 // 生命护盾效果
@@ -737,64 +993,14 @@
                 ctx.restore();
             }
 
-            // 绘制僚机
-            function drawWingmen() {
-                wingmen.forEach((wingman, index) => {
-                    ctx.fillStyle = '#ff9900';
-                    ctx.beginPath();
-                    ctx.moveTo(wingman.x + wingman.width/2, wingman.y);
-                    ctx.lineTo(wingman.x, wingman.y + wingman.height);
-                    ctx.lineTo(wingman.x + wingman.width, wingman.y + wingman.height);
-                    ctx.closePath();
-                    ctx.fill();
-
-                    // 僚机跟随玩家移动
-                    wingman.x += (player.x + player.width/2 - wingman.x - wingman.width/2) * 0.1;
-                    wingman.y += (player.y - 20 - wingman.y) * 0.1;
-
-                    // 僚机射击
-                    if (Date.now() - wingman.lastShotTime > 300) {
-                        bullets.push({
-                            x: wingman.x + wingman.width/2 - 4,
-                            y: wingman.y,
-                            width: 8,
-                            height: 16,
-                            speed: 15,
-                            damage: player.fireLevel,
-                            penetrate: penetrateBullet
-                        });
-                        wingman.lastShotTime = Date.now();
-                        playSound(shootSound);
-                        playBeep(700, 30); // 兜底音效
-                    }
-
-                    // 僚机碰撞检测
-                    enemies.forEach((enemy, eIndex) => {
-                        if (
-                            wingman.x < enemy.x + enemy.width &&
-                            wingman.x + wingman.width > enemy.x &&
-                            wingman.y < enemy.y + enemy.height &&
-                            wingman.y + wingman.height > enemy.y
-                        ) {
-                            wingmen.splice(index, 1);
-                            addExplosion(wingman.x + wingman.width/2, wingman.y + wingman.height/2, wingman.width);
-                            playSound(explosionSound);
-                            playBeep(200, 100); // 兜底音效
-                        }
-                    });
-                });
-            }
-
             // 生成子弹
             function shoot() {
                 const now = Date.now();
                 const interval = isMobile ? SHOOT_INTERVAL_MOBILE : SHOOT_INTERVAL_PC;
                 if (now - lastShotTime > interval) {
-                    // 播放射击音效
                     playSound(shootSound);
-                    playBeep(880, 50); // 兜底音效
+                    playBeep(880, 50);
 
-                    // 超级子弹效果
                     const bulletSize = player.superBullet ? 24 : 16;
                     const bulletSpeed = player.superBullet ? 20 : 15;
                     const bulletDamage = player.superBullet ? player.fireLevel * 2 : player.fireLevel;
@@ -853,27 +1059,6 @@
                         });
                     }
 
-                    if (player.fireLevel >= 4) {
-                        bullets.push({
-                            x: player.x - 10,
-                            y: player.y + 30,
-                            width: bulletSize,
-                            height: bulletSize + 8,
-                            speed: bulletSpeed,
-                            damage: bulletDamage,
-                            penetrate: penetrateBullet
-                        });
-                        bullets.push({
-                            x: player.x + player.width + 10 - bulletSize,
-                            y: player.y + 30,
-                            width: bulletSize,
-                            height: bulletSize + 8,
-                            speed: bulletSpeed,
-                            damage: bulletDamage,
-                            penetrate: penetrateBullet
-                        });
-                    }
-
                     lastShotTime = now;
                 }
             }
@@ -891,101 +1076,70 @@
                 });
             }
 
-            // 生成敌机 - 修正了速度计算逻辑
+            // 生成敌机
             function spawnEnemy() {
-                // 等级提升逻辑（平滑阈值）
+                const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
+                
+                // 如果正在生成敌人
+                if (waveSpawning && enemiesInCurrentWave < enemiesToSpawn) {
+                    // 生成当前关卡的敌机类型
+                    const availableTypes = config.enemyTypes;
+                    const typeName = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+                    const enemyType = ENEMY_TYPES[typeName];
+                    
+                    // 如果是BOSS关且还没生成BOSS
+                    if (config.boss && !bossSpawned && typeName === 'BOSS') {
+                        const bossHp = enemyType.hp * DIFFICULTY_CONFIG.hpMultiplier + (stage - 1) * DIFFICULTY_CONFIG.bossHpFactor;
+                        enemies.push({
+                            type: enemyType,
+                            x: canvas.width / 2 - enemyType.size/2,
+                            y: -enemyType.size,
+                            width: enemyType.size,
+                            height: enemyType.size,
+                            speed: enemyType.speed,
+                            hp: bossHp,
+                            score: enemyType.score,
+                            shootTimer: 0
+                        });
+                        bossSpawned = true;
+                        showPropTip(canvas.width/2, 100, `BOSS出现！`);
+                    } 
+                    // 普通敌机
+                    else if (typeName !== 'BOSS') {
+                        const size = enemyType.size + Math.random() * 10;
+                        const speed = enemyType.speed * DIFFICULTY_CONFIG.speedMultiplier;
+                        const hp = Math.floor(enemyType.hp * DIFFICULTY_CONFIG.hpMultiplier);
+
+                        enemies.push({
+                            type: enemyType,
+                            x: Math.random() * (canvas.width - size),
+                            y: -size,
+                            width: size,
+                            height: size,
+                            speed: speed,
+                            hp: hp,
+                            score: enemyType.score,
+                            shootTimer: 0
+                        });
+                    }
+                    
+                    enemiesInCurrentWave++;
+                    
+                    // 检查是否生成本波所有敌人
+                    if (enemiesInCurrentWave >= enemiesToSpawn) {
+                        waveSpawning = false;
+                    }
+                }
+                
+                // 等级提升逻辑
                 const levelUpScore = DIFFICULTY_CONFIG.levelUpBase + (level - 1) * DIFFICULTY_CONFIG.levelUpFactor;
-                if (score >= levelUpScore && level < 15) {
+                if (score >= levelUpScore && level < 10) {
                     level++;
-                    maxLevel = Math.max(maxLevel, level);
                     levelElement.textContent = level;
                     showPropTip(canvas.width/2, canvas.height/2, `等级提升！${level}级`);
                     playSound(levelUpSound);
-                    playBeep(1000, 100); // 兜底音效
+                    playBeep(1000, 100);
                 }
-
-                // BOSS生成（每5级生成一次）
-                if (level % 5 === 0 && !bossSpawned) {
-                    const bossHp = ENEMY_TYPES.BOSS.hp + (level - 5) * DIFFICULTY_CONFIG.bossHpFactor;
-                    // 限制BOSS生成的X坐标在画布内
-                    const bossX = Math.max(
-                        ENEMY_TYPES.BOSS.size/2, 
-                        Math.min(canvas.width - ENEMY_TYPES.BOSS.size/2, canvas.width / 2 - 50)
-                    );
-                    enemies.push({
-                        type: ENEMY_TYPES.BOSS,
-                        x: bossX, // 使用限制后的X坐标
-                        y: 50,
-                        width: ENEMY_TYPES.BOSS.size,
-                        height: ENEMY_TYPES.BOSS.size,
-                        speed: ENEMY_TYPES.BOSS.speed + (level * 0.02),
-                        hp: bossHp,
-                        score: ENEMY_TYPES.BOSS.score,
-                        shootTimer: 0
-                    });
-                    bossSpawned = true;
-                    showPropTip(canvas.width/2, 100, `BOSS出现！${level}级BOSS`);
-                    return;
-                }
-
-                // 普通敌机生成
-                const scoreFactor = Math.min(1, score / 5000);
-                const levelFactor = Math.min(1, (level - 1) / 10);
-                const progress = (scoreFactor + levelFactor) / 2;
-                const hardEnemyProb = Math.min(0.5, progress * 0.8);
-
-                const random = Math.random();
-                let enemyType;
-                if (random < 0.5 - hardEnemyProb) enemyType = ENEMY_TYPES.NORMAL;
-                else if (random < 0.75 + hardEnemyProb / 2) enemyType = ENEMY_TYPES.FAST;
-                else enemyType = ENEMY_TYPES.ARMORED;
-
-                // 敌机属性：随分数和等级平滑增长 - 修正了速度计算
-                const size = enemyType.size + Math.random() * 10;
-                
-                // 修正：更合理的速度计算公式
-                let speed;
-                if (enemyType === ENEMY_TYPES.FAST) {
-                    // 快速敌机：使用对数增长避免过快
-                    const fastScoreFactor = Math.min(score / 10000, 1);
-                    const fastLevelFactor = Math.min((level - 1) / 15, 1);
-                    const fastProgress = (fastScoreFactor + fastLevelFactor) / 2;
-                    
-                    // 基础速度 + 对数增长 + 进度影响
-                    speed = enemyType.speed + 
-                            Math.log1p(score * DIFFICULTY_CONFIG.fastEnemySpeedFactor * 100) * 0.5 +
-                            (fastProgress * 3);
-                    
-                    speed = Math.min(speed, 7); // 限制最大速度为7
-                } else {
-                    // 普通和装甲敌机
-                    const normalScoreFactor = Math.min(score / 10000, 1);
-                    const normalLevelFactor = Math.min((level - 1) / 15, 1);
-                    const normalProgress = (normalScoreFactor + normalLevelFactor) / 2;
-                    
-                    speed = enemyType.speed + 
-                            Math.log1p(score * DIFFICULTY_CONFIG.enemySpeedFactor * 100) * 0.3 +
-                            (normalProgress * 2);
-                    
-                    speed = Math.min(speed, 5); // 普通和装甲敌机最大速度5
-                }
-                
-                const hp = enemyType.hp + Math.floor(score * DIFFICULTY_CONFIG.enemyHpFactor + level * 0.1);
-
-                enemies.push({
-                    type: enemyType,
-                    x: Math.random() * (canvas.width - size),
-                    y: -size,
-                    width: size,
-                    height: size,
-                    speed: speed,
-                    hp: hp,
-                    score: enemyType.score,
-                    shootTimer: 0
-                });
-
-                // 重置BOSS生成标记
-                if (level % 5 !== 0) bossSpawned = false;
             }
 
             // 绘制敌机
@@ -1002,17 +1156,16 @@
                         ctx.fillStyle = '#ff0000';
                         ctx.fillRect(enemy.x, enemy.y - 5, enemy.width, 3);
                         ctx.fillStyle = '#00ff00';
-                        ctx.fillRect(enemy.x, enemy.y - 5, (enemy.hp / (enemy.type.hp + level * 0.1)) * enemy.width, 3);
+                        ctx.fillRect(enemy.x, enemy.y - 5, (enemy.hp / (enemy.type.hp * DIFFICULTY_CONFIG.hpMultiplier)) * enemy.width, 3);
                     }
 
                     // BOSS射击
                     if (enemy.type === ENEMY_TYPES.BOSS) {
                         enemy.shootTimer++;
-                        if (enemy.shootTimer % 60 === 0) {
-                            // BOSS弹幕
-                            for (let i = 0; i < 12; i++) {
-                                const angle = (i * 30) * Math.PI / 180;
-                                const bulletSpeed = 4 + level * DIFFICULTY_CONFIG.bossBulletSpeedFactor + score * 0.0001;
+                        if (enemy.shootTimer % 40 === 0) {
+                            for (let i = 0; i < 8; i++) {
+                                const angle = (i * 45) * Math.PI / 180;
+                                const bulletSpeed = 3 + (stage * DIFFICULTY_CONFIG.bossBulletSpeedFactor);
                                 enemyBullets.push({
                                     x: enemy.x + enemy.width/2 - 5,
                                     y: enemy.y + enemy.height/2 - 5,
@@ -1023,26 +1176,17 @@
                                 });
                             }
                         }
-                        // BOSS移动 - 修复出界问题
-                        const targetX = canvas.width / 2 + Math.sin(Date.now() / 1000) * 100;
-                        // 限制BOSS在画布内移动
-                        enemy.x = Math.max(
-                            0 + enemy.width/2, 
-                            Math.min(canvas.width - enemy.width/2, targetX)
-                        );
+                        // BOSS移动
+                        enemy.x = canvas.width / 2 + Math.sin(Date.now() / 2000) * 150 - enemy.width/2;
+                        enemy.x = Math.max(0, Math.min(canvas.width - enemy.width, enemy.x));
                     }
 
-                    // 普通敌机移动
+                    // 敌机移动
                     enemy.y += enemy.speed;
 
                     // 超出画布移除
                     if (enemy.y > canvas.height) {
                         enemies.splice(index, 1);
-                        // 随等级提升，普通敌机出界扣血的概率降低
-                        const loseLifeProb = Math.max(0.2, 1 - level * DIFFICULTY_CONFIG.loseLifeProbFactor);
-                        if (enemy.type !== ENEMY_TYPES.BOSS && Math.random() < loseLifeProb) {
-                            loseLife();
-                        }
                     }
                 });
             }
@@ -1073,7 +1217,7 @@
                     }
 
                     // 超出画布移除
-                    if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+                    if (bullet.x < -20 || bullet.x > canvas.width + 20 || bullet.y < -20 || bullet.y > canvas.height + 20) {
                         enemyBullets.splice(index, 1);
                     }
                 });
@@ -1081,23 +1225,9 @@
 
             // 生成道具
             function spawnProp(x, y) {
-                const random = Math.random();
-                let propType;
+                const propTypes = Object.values(PROP_TYPES);
+                const propType = propTypes[Math.floor(Math.random() * propTypes.length)];
                 
-                // 按概率分配道具类型
-                if (random < 0.15) propType = PROP_TYPES.FIRE;
-                else if (random < 0.25) propType = PROP_TYPES.LIFE;
-                else if (random < 0.35) propType = PROP_TYPES.SHIELD;
-                else if (random < 0.45) propType = PROP_TYPES.CLEAR;
-                else if (random < 0.55) propType = PROP_TYPES.SUPER_BULLET;
-                else if (random < 0.65) propType = PROP_TYPES.SPEED_BOOST;
-                else if (random < 0.75) propType = PROP_TYPES.INVINCIBLE;
-                else if (random < 0.85) propType = PROP_TYPES.BOMB;
-                else if (random < 0.9) propType = PROP_TYPES.SCORE_DOUBLE;
-                else if (random < 0.95) propType = PROP_TYPES.LIFE_SHIELD;
-                else if (random < 0.98) propType = PROP_TYPES.PENETRATE;
-                else propType = PROP_TYPES.WINGMAN;
-
                 props.push({
                     type: propType,
                     x: x,
@@ -1137,8 +1267,8 @@
                         player.y + player.height > prop.y
                     ) {
                         playSound(propSound);
-                        playBeep(600, 50); // 兜底音效
-                        applyPropEffect(prop.type.effect);
+                        playBeep(600, 50);
+                        applyPropEffect(prop.type.effect, prop.type.desc);
                         props.splice(index, 1);
                     }
 
@@ -1148,85 +1278,42 @@
             }
 
             // 道具效果
-            function applyPropEffect(effect) {
+            function applyPropEffect(effect, desc) {
                 switch (effect) {
                     case 'fire':
                         player.fireLevel = Math.min(5, player.fireLevel + 1);
-                        showPropTip(player.x, player.y, '火力提升！');
+                        showPropTip(player.x, player.y, desc);
                         break;
                     case 'life':
                         life = Math.min(6, life + 1);
                         lifeElement.textContent = life;
-                        showPropTip(player.x, player.y, '生命+1');
+                        showPropTip(player.x, player.y, desc);
                         break;
                     case 'shield':
                         player.shield = true;
-                        player.shieldTime = 5000;
-                        showPropTip(player.x, player.y, '获得护盾！');
+                        player.shieldTime = 8000;
+                        showPropTip(player.x, player.y, desc);
                         break;
                     case 'clear':
                         enemies = [];
                         enemyBullets = [];
-                        showPropTip(player.x, player.y, '清屏！');
-                        score += scoreDouble ? 100 : 50;
+                        showPropTip(player.x, player.y, desc);
+                        score += 100;
                         scoreElement.textContent = score;
                         playSound(explosionSound);
-                        playBeep(300, 200); // 兜底音效
+                        playBeep(300, 200);
                         break;
                     case 'superBullet':
                         player.superBullet = true;
-                        player.superBulletTime = 6000;
-                        showPropTip(player.x, player.y, '超级子弹！');
-                        break;
-                    case 'speedBoost':
-                        player.speedBoost = true;
-                        player.speed = player.baseSpeed * 1.8;
-                        player.speedBoostTime = 7000;
-                        showPropTip(player.x, player.y, '速度加成！');
-                        break;
-                    case 'invincible':
-                        player.invincible = true;
-                        player.invincibleTime = 8000;
-                        showPropTip(player.x, player.y, '无敌时间！');
+                        player.superBulletTime = 10000;
+                        showPropTip(player.x, player.y, desc);
                         break;
                     case 'bomb':
                         propsInventory.push('bomb');
                         propsCount = propsInventory.length;
                         propsCountElement.textContent = propsCount;
                         propUseBtn.classList.add('show');
-                        showPropTip(player.x, player.y, '获得炸弹！(按B使用)');
-                        break;
-                    case 'scoreDouble':
-                        scoreDouble = true;
-                        scoreDoubleTime = 10000;
-                        showPropTip(player.x, player.y, '得分翻倍！');
-                        break;
-                    case 'lifeShield':
-                        player.lifeShield = true;
-                        player.lifeShieldTime = 12000;
-                        showPropTip(player.x, player.y, '生命护盾！');
-                        break;
-                    case 'penetrate':
-                        penetrateBullet = true;
-                        penetrateTime = 9000;
-                        showPropTip(player.x, player.y, '穿透子弹！');
-                        break;
-                    case 'wingman':
-                        wingmen.push({
-                            x: player.x - 30,
-                            y: player.y - 20,
-                            width: 30,
-                            height: 30,
-                            lastShotTime: Date.now()
-                        });
-                        wingmen.push({
-                            x: player.x + player.width,
-                            y: player.y - 20,
-                            width: 30,
-                            height: 30,
-                            lastShotTime: Date.now()
-                        });
-                        showPropTip(player.x, player.y, '召唤僚机！');
+                        showPropTip(player.x, player.y, desc);
                         break;
                 }
             }
@@ -1245,7 +1332,7 @@
                     enemyBullets = [];
                     showPropTip(canvas.width/2, canvas.height/2, '炸弹爆炸！');
                     playSound(explosionSound);
-                    playBeep(200, 300); // 兜底音效
+                    playBeep(200, 300);
                 }
 
                 propsCount = propsInventory.length;
@@ -1263,7 +1350,7 @@
                 tip.style.left = `${x}px`;
                 tip.style.top = `${y}px`;
                 document.querySelector('.game-container').appendChild(tip);
-                setTimeout(() => tip.remove(), 1000);
+                setTimeout(() => tip.remove(), 1500);
             }
 
             // 爆炸效果
@@ -1277,7 +1364,7 @@
                     frameTimer: 0
                 });
                 playSound(explosionSound);
-                playBeep(200, 100); // 兜底音效
+                playBeep(200, 100);
             }
 
             function drawExplosions() {
@@ -1339,19 +1426,21 @@
                                 addExplosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2, enemy.width);
                                 const addScore = scoreDouble ? enemy.score * 2 : enemy.score;
                                 score += addScore;
+                                stageScore += addScore;
+                                totalKills++;
                                 scoreElement.textContent = score;
 
-                                // 道具掉落概率：随难度提升，适当提高概率
-                                const propDropRate = DIFFICULTY_CONFIG.propDropRate.base + score * DIFFICULTY_CONFIG.propDropRate.difficultyCompensate;
-                                if (Math.random() < Math.min(0.3, propDropRate)) {
+                                // 道具掉落概率
+                                const propDropRate = DIFFICULTY_CONFIG.propDropRate.base;
+                                if (Math.random() < propDropRate) {
                                     spawnProp(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
                                 }
 
-                                // BOSS被击败后的奖励
+                                // BOSS被击败
                                 if (enemy.type === ENEMY_TYPES.BOSS) {
-                                    showPropTip(enemy.x, enemy.y, 'BOSS被击败！');
-                                    const bossScore = scoreDouble ? 1000 : 500;
-                                    score += bossScore;
+                                    showPropTip(enemy.x, enemy.y, 'BOSS击破！');
+                                    score += 500;
+                                    stageScore += 500;
                                     scoreElement.textContent = score;
                                 }
                             }
@@ -1418,15 +1507,16 @@
             // 游戏结束
             function gameOverFunc() {
                 gameRunning = false;
-                gameOver.style.display = 'block';
                 finalScoreElement.textContent = score;
-                finalLevelElement.textContent = maxLevel;
+                finalStageElement.textContent = maxStage;
+                finalKillsElement.textContent = totalKills;
+                gameOver.style.display = 'block';
 
                 // 停止背景音乐
                 bgMusic.pause();
                 // 播放游戏结束音效
                 playSound(gameOverSound);
-                playBeep(100, 500); // 兜底音效
+                playBeep(100, 500);
 
                 // 更新本地存储
                 if (score > historyScore) {
@@ -1435,10 +1525,14 @@
                     historyScoreElement.textContent = historyScore;
                 }
 
-                if (maxLevel > historyMaxLevel) {
-                    historyMaxLevel = maxLevel;
-                    localStorage.setItem('planeGameMaxLevel', historyMaxLevel);
+                if (maxStage > historyMaxStage) {
+                    historyMaxStage = maxStage;
+                    localStorage.setItem('planeGameMaxStage', historyMaxStage);
+                    historyStageElement.textContent = historyMaxStage;
                 }
+
+                localStorage.setItem('planeGameTotalKills', 
+                    Math.max(historyTotalKills, totalKills));
             }
 
             // 重置游戏
@@ -1446,7 +1540,9 @@
                 score = 0;
                 life = 3;
                 level = 1;
-                maxLevel = 1;
+                stage = 1;
+                maxStage = 1;
+                totalKills = 0;
                 player = {
                     x: canvas.width / 2 - 25,
                     y: canvas.height - 80,
@@ -1470,7 +1566,6 @@
                 enemies = [];
                 props = [];
                 enemyBullets = [];
-                wingmen = [];
                 explosions = [];
                 enemySpawnTimer = 0;
                 bossSpawned = false;
@@ -1482,20 +1577,17 @@
                 scoreDoubleTime = 0;
                 penetrateBullet = false;
                 penetrateTime = 0;
+                
                 scoreElement.textContent = score;
                 lifeElement.textContent = life;
                 levelElement.textContent = level;
+                stageElement.textContent = stage;
                 propsCountElement.textContent = propsCount;
                 propUseBtn.classList.remove('show');
                 gameOver.style.display = 'none';
                 autoShoot = isMobile;
-                // 更新难度配置
-                DIFFICULTY_CONFIG = getDifficultyConfig(selectedDifficulty);
-
-                // 开始背景音乐（在用户交互后执行）
-                if (soundOn && userInteracted) {
-                    bgMusic.currentTime = 0;
-                }
+                
+                DIFFICULTY_CONFIG = getStageDifficulty(stage);
             }
 
             // 绘制太空背景
@@ -1507,11 +1599,11 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 // 星星
-                for (let i = 0; i < 200; i++) {
+                for (let i = 0; i < 150; i++) {
                     const x = Math.random() * canvas.width;
                     const y = Math.random() * canvas.height;
-                    const size = Math.random() * 3 + 1;
-                    const alpha = Math.random();
+                    const size = Math.random() * 2 + 1;
+                    const alpha = Math.random() * 0.8 + 0.2;
                     ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
                     ctx.fillRect(x, y, size, size);
                 }
@@ -1519,24 +1611,28 @@
                 // 星云
                 ctx.fillStyle = 'rgba(100, 100, 255, 0.1)';
                 ctx.beginPath();
-                ctx.arc(canvas.width/2, canvas.height/2, 200, 0, Math.PI * 2);
+                ctx.arc(canvas.width/2, canvas.height/2, 150, 0, Math.PI * 2);
                 ctx.fill();
             }
 
             // 游戏主循环
             function gameLoop() {
-                if (!gameRunning) return;
+                if (!gameRunning) {
+                    // 即使游戏暂停，也继续调用循环以检测恢复
+                    requestAnimationFrame(gameLoop);
+                    return;
+                }
 
                 drawBackground();
 
-                // 玩家移动
-                if (keys['ArrowLeft'] || keys['a']) player.x -= player.speed;
-                if (keys['ArrowRight'] || keys['d']) player.x += player.speed;
-                if (keys['ArrowUp'] || keys['w']) player.y -= player.speed;
-                if (keys['ArrowDown'] || keys['s']) player.y += player.speed;
+                // 玩家移动 - 修复：确保移动逻辑正确
+                if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= player.speed;
+                if (keys['ArrowRight'] || keys['d'] || keys['D']) player.x += player.speed;
+                if (keys['ArrowUp'] || keys['w'] || keys['W']) player.y -= player.speed;
+                if (keys['ArrowDown'] || keys['s'] || keys['S']) player.y += player.speed;
 
                 // 射击控制
-                if (keys['Space'] || keys[' ']) shoot();
+                if (keys[' '] || keys['Spacebar'] || keys['Space']) shoot();
                 if (autoShoot && gameRunning) {
                     const now = Date.now();
                     if (now - lastAutoShootTime > SHOOT_INTERVAL_MOBILE) {
@@ -1588,20 +1684,19 @@
                     if (penetrateTime <= 0) penetrateBullet = false;
                 }
 
-                // 生成敌机（难度平滑递增）
+                // 生成敌机 - 修复：确保敌机生成逻辑正确
                 enemySpawnTimer++;
-                const scoreFactor = Math.min(1, score / 5000);
-                const levelFactor = Math.min(1, (level - 1) / 10);
-                const progress = (scoreFactor + levelFactor) / 2;
-                const spawnRate = DIFFICULTY_CONFIG.spawnRate.max - 
-                                (DIFFICULTY_CONFIG.spawnRate.max - DIFFICULTY_CONFIG.spawnRate.min) * progress;
-                const spawnRateInt = Math.max(Math.floor(spawnRate), DIFFICULTY_CONFIG.spawnRate.min);
-
-                if (enemySpawnTimer % spawnRateInt === 0) spawnEnemy();
+                
+                // 简化敌机生成逻辑：每帧都有概率生成
+                if (waveSpawning && enemiesInCurrentWave < enemiesToSpawn) {
+                    // 增加生成频率
+                    if (enemySpawnTimer % Math.max(10, 30 - stage) === 0) {
+                        spawnEnemy();
+                    }
+                }
 
                 // 绘制所有元素
                 drawPlayer();
-                drawWingmen();
                 drawBullets();
                 drawEnemies();
                 drawEnemyBullets();
@@ -1610,7 +1705,19 @@
 
                 // 碰撞检测
                 checkCollisions();
+                
+                // 检查波次完成
+                if (!waveSpawning && enemies.length === 0 && currentWave < wavesInStage) {
+                    // 延迟一下再开始下一波
+                    setTimeout(() => {
+                        startNextWave();
+                    }, 1000);
+                }
+                
+                // 检查关卡完成
+                checkStageComplete();
 
+                // 继续游戏循环
                 requestAnimationFrame(gameLoop);
             }
 
@@ -1621,59 +1728,39 @@
                 autoShoot = isMobile;
             }
 
-            // 事件监听
+            // 开始游戏
             mainStartBtn.addEventListener('click', () => {
                 startScreen.style.display = 'none';
-                gameRunning = true;
-                resetGame();
-                
-                // 强制触发用户交互标记
                 userInteracted = true;
                 
-                // 激活音频上下文（解决Chrome暂停策略）
                 if (audioContext && audioContext.state === 'suspended') {
                     audioContext.resume();
                 }
                 
-                // 播放背景音乐（多次尝试）
-                if (soundOn) {
-                    bgMusic.play().then(() => {
-                        console.log('背景音乐播放成功');
-                    }).catch(e => {
-                        console.log('第一次播放失败，重试:', e);
-                        // 克隆后播放
-                        const bgMusicClone = bgMusic.cloneNode();
-                        bgMusicClone.loop = true;
-                        bgMusicClone.play().then(() => {
-                            console.log('克隆后背景音乐播放成功');
-                            document.body.replaceChild(bgMusicClone, bgMusic);
-                            bgMusic = bgMusicClone;
-                        }).catch(e2 => {
-                            console.log('克隆后仍失败:', e2);
-                            showPropTip(canvas.width/2, canvas.height/2, '音频已通过Web Audio API兜底');
-                        });
-                    });
-                }
+                resetGame();
+                showStageNotice();
                 
-                gameLoop();
+                // 播放背景音乐
+                if (soundOn) {
+                    bgMusic.currentTime = 0;
+                    bgMusic.play().catch(e => console.log('背景音乐播放失败:', e));
+                }
             });
 
+            // 重新开始
             restartBtn.addEventListener('click', () => {
+                gameOver.style.display = 'none';
                 resetGame();
-                gameRunning = true;
-                
-                // 重新播放背景音乐
-                if (soundOn && userInteracted) {
-                    bgMusic.currentTime = 0;
-                    bgMusic.play().catch(e => console.log('背景音乐重新播放失败:', e));
-                }
-                
-                gameLoop();
+                showStageNotice();
             });
 
             // 初始化
             resizeCanvas();
             initGame();
+            
+            // 初始调整画布大小
+            setTimeout(resizeCanvas, 100);
+            window.addEventListener('resize', resizeCanvas);
         });
     </script>
 </body>
