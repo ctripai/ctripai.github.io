@@ -1,405 +1,394 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二年级口算闯关大冒险</title>
-    <style>
-        * {margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑","幼圆",sans-serif;}
-        body {background:linear-gradient(#f9f6e8, #f0ead6);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-x:hidden;}
-        .game-container {width:90%;max-width:500px;background:#faf6e9;border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,0.15);padding:25px;text-align:center;border:5px solid #ff9800;position:relative;z-index:10;}
-        .title {color:#e91e63;font-size:32px;margin-bottom:15px;text-shadow:2px 2px 4px rgba(0,0,0,0.1);font-weight:bold;}
-        .level-info {font-size:20px;color:#2196f3;margin:10px 0;background:#f7f2df;padding:8px;border-radius:10px;}
-        .question-box {font-size:28px;margin:20px 0;padding:20px;background:#fff8e1;border-radius:15px;border:3px dashed #ffc107;font-weight:bold;}
-        /* 答案框样式修改：下划线样式，默认空白 */
-        .answer-display {
-            display: inline-block;
-            min-width: 80px;
-            font-size: 28px;
-            text-align: center;
-            margin: 0 5px;
-            color: #2e7d32;
-            font-weight: bold;
-            border-bottom: 4px solid #4caf50;
-            background: transparent;
-        }
-        .num-keyboard {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:280px;margin:25px auto;}
-        .num-btn {padding:18px 0;font-size:24px;border:none;border-radius:15px;cursor:pointer;color:#fff;font-weight:bold;box-shadow:0 4px 8px rgba(0,0,0,0.2);transition:all 0.2s;}
-        .num-btn:hover {transform:translateY(-3px);box-shadow:0 6px 12px rgba(0,0,0,0.25);}
-        .num-btn:nth-child(1) {background:#e91e63;}
-        .num-btn:nth-child(2) {background:#9c27b0;}
-        .num-btn:nth-child(3) {background:#673ab7;}
-        .num-btn:nth-child(4) {background:#3f51b5;}
-        .num-btn:nth-child(5) {background:#2196f3;}
-        .num-btn:nth-child(6) {background:#03a9f4;}
-        .num-btn:nth-child(7) {background:#00bcd4;}
-        .num-btn:nth-child(8) {background:#009688;}
-        .num-btn:nth-child(9) {background:#4caf50;}
-        .num-btn:nth-child(10) {background:#8bc34a;}
-        .del-btn {background:#ff5722 !important;}
-        .btn {padding:12px 30px;font-size:20px;background:#ff9800;color:#fff;border:none;border-radius:15px;cursor:pointer;margin:15px;box-shadow:0 4px 8px rgba(0,0,0,0.2);}
-        .btn:hover {background:#f57c00;transform:translateY(-2px);}
-        .score-box {font-size:20px;color:#e91e63;margin:15px 0;font-weight:bold;}
-        .result {font-size:22px;margin:12px 0;font-weight:bold;}
-        .success {color:#4caf50;text-shadow:1px 1px 2px rgba(0,0,0,0.1);}
-        .error {color:#f44336;text-shadow:1px 1px 2px rgba(0,0,0,0.1);}
-        .hidden {display:none;}
-        .reward {margin-top:20px;font-size:30px;color:#ffd700;font-weight:bold;text-shadow:0 0 10px #ff9800, 0 0 20px #ff9800, 2px 2px 4px #333;padding:15px;border-radius:10px;background:rgba(255, 152, 0, 0.2);animation: rewardBounce 1s ease-in-out infinite alternate, rewardFlash 0.5s ease-in-out infinite alternate;}
-        @keyframes rewardBounce {from {transform:scale(1);} to {transform:scale(1.1);}}
-        @keyframes rewardFlash {from {opacity:1;} to {opacity:0.8;}}
-        .star {position:absolute;color:#ffd700;font-size:30px;opacity:0;text-shadow:0 0 5px #ff9800;animation:fall 2s linear forwards;z-index:5;}
-        @keyframes fall {0%{transform:translateY(-50px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(360deg);opacity:0;}}
-        .level-up-popup {
-            position:fixed;
-            top:50%;
-            left:50%;
-            transform:translate(-50%,-50%) scale(0);
-            background:#fff;
-            border:6px solid #ffd700;
-            border-radius:15px;
-            box-shadow:0 0 20px rgba(255, 215, 0, 0.6);
-            padding:20px;
-            width:320px;
-            max-width:90vw;
-            z-index:1000;
-            text-align:center;
-            animation:popup 0.8s forwards;
-        }
-        @keyframes popup {0%{transform:translate(-50%,-50%) scale(0);}70%{transform:translate(-50%,-50%) scale(1.1);}100%{transform:translate(-50%,-50%) scale(1);}}
-        .popup-title {
-            color:#ff9800;
-            font-size:24px;
-            margin-bottom:10px;
-            text-shadow:1px 1px 2px rgba(0,0,0,0.2);
-            white-space:nowrap;
-        }
-        .popup-desc {
-            color:#333;
-            font-size:16px;
-            margin-bottom:12px;
-            line-height:1.4;
-        }
-        .confetti {position:absolute;width:10px;height:30px;opacity:0.8;animation:fallConfetti 3s ease-in-out forwards;z-index:999;}
-        @keyframes fallConfetti {0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
-        .music-tip {position:fixed;top:10px;left:50%;transform:translateX(-50%);background:rgba(255,152,0,0.9);color:#fff;padding:8px 16px;border-radius:10px;font-size:14px;z-index:200;}
-        .speaker-icon {position:absolute;top:20px;right:20px;font-size:24px;cursor:pointer;color:#ff9800;transition:color 0.2s;}
-        .speaker-icon:hover {color:#f57c00;}
-        /* 新增音乐选择按钮样式 */
-        .music-selector {
-            margin: 10px 0;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        .music-btn {
-            padding: 5px 10px;
-            font-size: 14px;
-            background: #e3f2fd;
-            border: 2px solid #2196f3;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .music-btn.active {
-            background: #2196f3;
-            color: white;
-        }
-    </style>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二年级口算闯关大冒险</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑","幼圆",sans-serif;}
+body {background:linear-gradient(#f9f6e8, #f0ead6);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-x:hidden;}
+.game-container {width:90%;max-width:500px;background:#faf6e9;border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,0.15);padding:25px;text-align:center;border:5px solid #ff9800;position:relative;z-index:10;}
+.title {color:#e91e63;font-size:32px;margin-bottom:15px;text-shadow:2px 2px 4px rgba(0,0,0,0.1);font-weight:bold;}
+.level-info {font-size:20px;color:#2196f3;margin:10px 0;background:#f7f2df;padding:8px;border-radius:10px;}
+.question-box {font-size:28px;margin:20px 0;padding:20px;background:#fff8e1;border-radius:15px;border:3px dashed #ffc107;font-weight:bold;
+    /* 新增样式确保不换行 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 200px;
+    display: inline-block;
+}
+/* 答案框样式修改：下划线样式，默认空白 */
+.answer-display {
+display: inline-block;
+min-width: 80px;
+font-size: 28px;
+text-align: center;
+margin: 0 5px;
+color: #2e7d32;
+font-weight: bold;
+border-bottom: 4px solid #4caf50;
+background: transparent;
+vertical-align: bottom;
+}
+.num-keyboard {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:280px;margin:25px auto;}
+.num-btn {padding:18px 0;font-size:24px;border:none;border-radius:15px;cursor:pointer;color:#fff;font-weight:bold;box-shadow:0 4px 8px rgba(0,0,0,0.2);transition:all 0.2s;}
+.num-btn:hover {transform:translateY(-3px);box-shadow:0 6px 12px rgba(0,0,0,0.25);}
+.num-btn:nth-child(1) {background:#e91e63;}
+.num-btn:nth-child(2) {background:#9c27b0;}
+.num-btn:nth-child(3) {background:#673ab7;}
+.num-btn:nth-child(4) {background:#3f51b5;}
+.num-btn:nth-child(5) {background:#2196f3;}
+.num-btn:nth-child(6) {background:#03a9f4;}
+.num-btn:nth-child(7) {background:#00bcd4;}
+.num-btn:nth-child(8) {background:#009688;}
+.num-btn:nth-child(9) {background:#4caf50;}
+.num-btn:nth-child(10) {background:#8bc34a;}
+.del-btn {background:#ff5722 !important;}
+.btn {padding:12px 30px;font-size:20px;background:#ff9800;color:#fff;border:none;border-radius:15px;cursor:pointer;margin:15px;box-shadow:0 4px 8px rgba(0,0,0,0.2);}
+.btn:hover {background:#f57c00;transform:translateY(-2px);}
+.score-box {font-size:20px;color:#e91e63;margin:15px 0;font-weight:bold;}
+.result {font-size:22px;margin:12px 0;font-weight:bold;}
+.success {color:#4caf50;text-shadow:1px 1px 2px rgba(0,0,0,0.1);}
+.error {color:#f44336;text-shadow:1px 1px 2px rgba(0,0,0,0.1);}
+.hidden {display:none;}
+.reward {margin-top:20px;font-size:30px;color:#ffd700;font-weight:bold;text-shadow:0 0 10px #ff9800, 0 0 20px #ff9800, 2px 2px 4px #333;padding:15px;border-radius:10px;background:rgba(255, 152, 0, 0.2);animation: rewardBounce 1s ease-in-out infinite alternate, rewardFlash 0.5s ease-in-out infinite alternate;}
+@keyframes rewardBounce {from {transform:scale(1);} to {transform:scale(1.1);}}
+@keyframes rewardFlash {from {opacity:1;} to {opacity:0.8;}}
+.star {position:absolute;color:#ffd700;font-size:30px;opacity:0;text-shadow:0 0 5px #ff9800;animation:fall 2s linear forwards;z-index:5;}
+@keyframes fall {0%{transform:translateY(-50px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(360deg);opacity:0;}}
+
+.level-up-popup {
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%) scale(0);
+background:#fff;
+border:6px solid #ffd700;
+border-radius:15px;
+box-shadow:0 0 20px rgba(255, 215, 0, 0.6);
+padding:20px;
+width:320px;
+max-width:90vw;
+z-index:1000;
+text-align:center;
+animation:popup 0.8s forwards;
+}
+@keyframes popup {0%{transform:translate(-50%,-50%) scale(0);}70%{transform:translate(-50%,-50%) scale(1.1);}100%{transform:translate(-50%,-50%) scale(1);}}
+.popup-title {
+color:#ff9800;
+font-size:24px;
+margin-bottom:10px;
+text-shadow:1px 1px 2px rgba(0,0,0,0.2);
+white-space:nowrap;
+}
+.popup-desc {
+color:#333;
+font-size:16px;
+margin-bottom:12px;
+line-height:1.4;
+}
+.confetti {position:absolute;width:10px;height:30px;opacity:0.8;animation:fallConfetti 3s ease-in-out forwards;z-index:999;}
+@keyframes fallConfetti {0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+.music-tip {position:fixed;top:10px;left:50%;transform:translateX(-50%);background:rgba(255,152,0,0.9);color:#fff;padding:8px 16px;border-radius:10px;font-size:14px;z-index:200;}
+.speaker-icon {position:absolute;top:20px;right:20px;font-size:24px;cursor:pointer;color:#ff9800;transition:color 0.2s;}
+.speaker-icon:hover {color:#f57c00;}
+/* 新增音乐选择按钮样式 */
+.music-selector {
+margin: 10px 0;
+display: flex;
+justify-content: center;
+gap: 10px;
+}
+.music-btn {
+padding: 5px 10px;
+font-size: 14px;
+background: #e3f2fd;
+border: 2px solid #2196f3;
+border-radius: 8px;
+cursor: pointer;
+}
+.music-btn.active {
+background: #2196f3;
+color: white;
+}
+</style>
 </head>
 <body>
-    <div class="music-tip" id="musicTip">点击屏幕任意位置开启音乐声音</div>
-    <div class="game-container">
-        <div class="speaker-icon" id="speakerIcon">🔇</div>
-        <h1 class="title">数学王国大闯关</h1>
-        <div class="level-info" id="levelText">当前关卡：1 城堡大门</div>
-        <div class="score-box">累计星星：<span id="score">0</span>颗</div>
-        <!-- 音乐选择按钮 -->
-        <div class="music-selector">
-            <button class="music-btn active" data-music="1">轻松旋律</button>
-            <button class="music-btn" data-music="2">自然之声</button>
-            <button class="music-btn" data-music="3">欢快节奏</button>
-        </div>
-        <!-- 问题框结构调整，将答案框整合到算式后 -->
-        <div class="question-box">
-            <span id="questionPart">?</span>
-            <span class="answer-display" id="answerDisplay"></span>
-        </div>
-        <div class="num-keyboard">
-            <button class="num-btn">1</button><button class="num-btn">2</button><button class="num-btn">3</button>
-            <button class="num-btn">4</button><button class="num-btn">5</button><button class="num-btn">6</button>
-            <button class="num-btn">7</button><button class="num-btn">8</button><button class="num-btn">9</button>
-            <button class="num-btn">0</button><button class="num-btn del-btn" id="delBtn">删除</button>
-        </div>
-        <div class="result" id="result"></div>
-        <div class="reward hidden" id="reward"></div>
-    </div>
+<div class="music-tip" id="musicTip">点击屏幕任意位置开启音乐声音</div>
+<div class="game-container">
+<div class="speaker-icon" id="speakerIcon">🔇</div>
+<h1 class="title">数学王国大闯关</h1>
+<div class="level-info" id="levelText">当前关卡：1 城堡大门</div>
+<div class="score-box">累计星星：<span id="score">0</span>颗</div>
+<!-- 音乐选择按钮 -->
+<div class="music-selector">
+<button class="music-btn active" data-music="1">轻松旋律</button>
+<button class="music-btn" data-music="2">自然之声</button>
+<button class="music-btn" data-music="3">欢快节奏</button>
+</div>
+<!-- 问题框结构调整，将答案框整合到算式后 -->
+<div class="question-box">
+<span id="questionPart">?</span>
+<span class="answer-display" id="answerDisplay"></span>
+</div>
+<div class="num-keyboard">
+<button class="num-btn">1</button><button class="num-btn">2</button><button class="num-btn">3</button>
+<button class="num-btn">4</button><button class="num-btn">5</button><button class="num-btn">6</button>
+<button class="num-btn">7</button><button class="num-btn">8</button><button class="num-btn">9</button>
+<button class="num-btn">0</button><button class="num-btn del-btn" id="delBtn">删除</button>
+</div>
+<div class="result" id="result"></div>
+<div class="reward hidden" id="reward"></div>
+</div>
+<script>
+const questionBank = [
+["3×5+6=",21],["23+18=",41],["80-56=",24],["7×4=",28],["45-19+27=",53],["9×2=",18],["6+8×3=",30],["72-45=",27],
+["5×7-10=",25],["36+24=",60],["91-28=",63],["8×6+5=",53],["63-17=",46],["22+7×3=",43],["4×9=",36],["54-29+16=",41],
+["76-48+35=",63],["9×3+12=",39],["43+29-17=",55],["81-36=",45],["6×5-8=",22],["27+54=",81],["5×8+21=",61],["90-57+23=",56],
+["88-49+32=",71],["7×6-15=",27],["38+47-29=",56],["6×9+18=",72],["72-38=",34],["4×8+36=",68],["59+26-41=",44],["8×7-20=",36],
+["9×8-36=",36],["65+28-47=",46],["7×9+13=",76],["84-39+25=",70],["5×9+42=",87],["92-56+19=",55],["6×8-12=",36],["45+38-26=",57]
+];
+const levelNames = ["城堡大门","花园小径","森林迷宫","湖泊石桥","宝藏屋"];
+const rewardTexts = [
+"解锁城堡大门！获得「数学小探员」称号✨",
+"穿过花园小径！「数学小探员」进阶啦🌟",
+"走出森林迷宫！获得「数学小能手」称号💫",
+"跨过湖泊石桥！「数学小能手」超厉害🔥",
+"打开宝藏屋！获得「数学小王者」称号🏆，解锁金勋章！"
+];
+// 三套不同风格的背景音乐
+const melodies = {
+1: [261.63, 329.63, 392.00, 329.63, 261.63, 293.66, 349.23, 293.66], // 原轻松旋律
+2: [196.00, 220.00, 261.63, 220.00, 196.00, 164.81, 196.00, 164.81], // 自然之声风格 - 更舒缓低沉
+3: [329.63, 392.00, 440.00, 392.00, 329.63, 392.00, 440.00, 493.88]  // 欢快节奏风格 - 更高昂明快
+};
 
-    <script>
-        const questionBank = [
-            ["3×5+6=",21],["23+18=",41],["80-56=",24],["7×4=",28],["45-19+27=",53],["9×2=",18],["6+8×3=",30],["72-45=",27],
-            ["5×7-10=",25],["36+24=",60],["91-28=",63],["8×6+5=",53],["63-17=",46],["22+7×3=",43],["4×9=",36],["54-29+16=",41],
-            ["76-48+35=",63],["9×3+12=",39],["43+29-17=",55],["81-36=",45],["6×5-8=",22],["27+54=",81],["5×8+21=",61],["90-57+23=",56],
-            ["88-49+32=",71],["7×6-15=",27],["38+47-29=",56],["6×9+18=",72],["72-38=",34],["4×8+36=",68],["59+26-41=",44],["8×7-20=",36],
-            ["9×8-36=",36],["65+28-47=",46],["7×9+13=",76],["84-39+25=",70],["5×9+42=",87],["92-56+19=",55],["6×8-12=",36],["45+38-26=",57]
-        ];
-        const levelNames = ["城堡大门","花园小径","森林迷宫","湖泊石桥","宝藏屋"];
-        const rewardTexts = [
-            "解锁城堡大门！获得「数学小探员」称号✨",
-            "穿过花园小径！「数学小探员」进阶啦🌟",
-            "走出森林迷宫！获得「数学小能手」称号💫",
-            "跨过湖泊石桥！「数学小能手」超厉害🔥",
-            "打开宝藏屋！获得「数学小王者」称号🏆，解锁金勋章！"
-        ];
+let currentLevel = 0, currentQuestion = 0, score = 0, userAnswer = "", isChecking = false;
+let currentMelody = 1; // 当前选中的音乐
+const totalQuestionsPerLevel = 8, answerDelay = 1200, levelUpDelay = 3000;
+let audioContext, bgOscillator, gainNode, isMusicPlaying = true, isMuted = true, noteIndex = 0;
+const successFreq = [523.25, 659.25];
+const errorFreq = [293.66, 220.00];
+const levelUpFreq = [392.00, 523.25, 659.25, 783.99];
+const finalFreq = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+// 获取DOM元素
+const levelText = document.getElementById("levelText");
+const questionPart = document.getElementById("questionPart");
+const answerDisplay = document.getElementById("answerDisplay");
+const result = document.getElementById("result");
+const scoreSpan = document.getElementById("score");
+const reward = document.getElementById("reward");
+const delBtn = document.getElementById("delBtn");
+const numBtns = document.querySelectorAll(".num-btn:not(#delBtn)");
+const speakerIcon = document.getElementById("speakerIcon");
+const musicTip = document.getElementById("musicTip");
+const musicBtns = document.querySelectorAll(".music-btn");
+// 初始化音频
+function initAudio() {
+if (audioContext) return; // 防止重复初始化
+audioContext = new (window.AudioContext || window.webkitAudioContext)();
+gainNode = audioContext.createGain();
+gainNode.gain.value = isMuted ? 0 : 0.15;
+gainNode.connect(audioContext.destination);
+playBgMusic();
+speakerIcon.innerText = isMuted ? "🔇" : "🔊";
+}
+// 播放背景音乐
+function playBgMusic() {
+if (!isMusicPlaying || !audioContext) return;
+if (bgOscillator) {
+try {
+bgOscillator.stop();
+} catch (e) {}
+}
+bgOscillator = audioContext.createOscillator();
+bgOscillator.type = "sine";
+// 使用当前选中的旋律
+bgOscillator.frequency.value = melodies[currentMelody][noteIndex];
+bgOscillator.connect(gainNode);
 
-        // 三套不同风格的背景音乐
-        const melodies = {
-            1: [261.63, 329.63, 392.00, 329.63, 261.63, 293.66, 349.23, 293.66], // 原轻松旋律
-            2: [196.00, 220.00, 261.63, 220.00, 196.00, 164.81, 196.00, 164.81], // 自然之声风格 - 更舒缓低沉
-            3: [329.63, 392.00, 440.00, 392.00, 329.63, 392.00, 440.00, 493.88]  // 欢快节奏风格 - 更高昂明快
-        };
-        
-        let currentLevel = 0, currentQuestion = 0, score = 0, userAnswer = "", isChecking = false;
-        let currentMelody = 1; // 当前选中的音乐
-        const totalQuestionsPerLevel = 8, answerDelay = 1200, levelUpDelay = 3000;
-        let audioContext, bgOscillator, gainNode, isMusicPlaying = true, isMuted = true, noteIndex = 0;
-        const successFreq = [523.25, 659.25]; 
-        const errorFreq = [293.66, 220.00]; 
-        const levelUpFreq = [392.00, 523.25, 659.25, 783.99]; 
-        const finalFreq = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+const startTime = audioContext.currentTime;
+bgOscillator.start(startTime);
+// 根据不同旋律调整播放时长，增强风格差异
+const noteDuration = currentMelody === 2 ? 1.2 : 0.8; // 自然之声节奏更慢
+bgOscillator.stop(startTime + noteDuration);
+noteIndex = (noteIndex + 1) % melodies[currentMelody].length;
+setTimeout(playBgMusic, noteDuration * 1000);
+}
+// 切换音乐
+function switchMusic(musicId) {
+currentMelody = musicId;
+noteIndex = 0; // 重置音符索引
+// 更新按钮状态
+musicBtns.forEach(btn => {
+if (parseInt(btn.dataset.music) === currentMelody) {
+btn.classList.add('active');
+} else {
+btn.classList.remove('active');
+}
+});
+// 重新播放音乐
+if (audioContext) {
+playBgMusic();
+}
+}
+function playTipSound(frequencies) {
+if (isMuted || !audioContext) return;
+let tipIndex = 0;
+function playNote() {
+const oscillator = audioContext.createOscillator();
+oscillator.type = "sine";
+oscillator.frequency.value = frequencies[tipIndex];
+oscillator.connect(gainNode);
+const startTime = audioContext.currentTime;
+oscillator.start(startTime);
+oscillator.stop(startTime + 0.2);
+tipIndex++;
+if (tipIndex < frequencies.length) {
+setTimeout(playNote, 200);
+}
+}
+playNote();
+}
+function toggleMute() {
+if (!audioContext) initAudio(); // 未初始化则先初始化
+isMuted = !isMuted;
+gainNode.gain.value = isMuted ? 0 : 0.15;
+speakerIcon.innerText = isMuted ? "🔇" : "🔊";
+if (!isMuted) musicTip.style.display = "none";
+}
+// 用户点击任意位置初始化音频
+document.addEventListener("click", (e) => {
+initAudio();
+if (isMuted && e.target.id !== "speakerIcon" && !e.target.classList.contains('music-btn')) {
+toggleMute();
+}
+});
+speakerIcon.addEventListener("click", toggleMute);
 
-        // 获取DOM元素
-        const levelText = document.getElementById("levelText");
-        const questionPart = document.getElementById("questionPart");
-        const answerDisplay = document.getElementById("answerDisplay");
-        const result = document.getElementById("result");
-        const scoreSpan = document.getElementById("score");
-        const reward = document.getElementById("reward");
-        const delBtn = document.getElementById("delBtn");
-        const numBtns = document.querySelectorAll(".num-btn:not(#delBtn)");
-        const speakerIcon = document.getElementById("speakerIcon");
-        const musicTip = document.getElementById("musicTip");
-        const musicBtns = document.querySelectorAll(".music-btn");
+// 音乐切换按钮事件
+musicBtns.forEach(btn => {
+btn.addEventListener('click', () => {
+switchMusic(parseInt(btn.dataset.music));
+});
+});
+// 初始化游戏
+function initGame() {
+const qIndex = currentLevel * totalQuestionsPerLevel + currentQuestion;
+if (qIndex >= questionBank.length) return; // 防止越界
+questionPart.innerText = questionBank[qIndex][0];
+result.innerText = "";
+userAnswer = "";
+answerDisplay.innerText = ""; // 答案框默认空白
+reward.classList.add("hidden");
+isChecking = false;
+}
+// 页面加载后立即初始化游戏，显示第一题
+initGame();
+numBtns.forEach(btn => {
+btn.addEventListener("click", () => {
+if (isChecking) return;
+const num = btn.innerText;
+if (userAnswer === "" && num === "0") return; // 避免 leading zero
+if (userAnswer.length >= 2) return;
+userAnswer += num;
+answerDisplay.innerText = userAnswer;
+autoSubmit();
+});
+});
+delBtn.addEventListener("click", () => {
+if (isChecking) return;
+userAnswer = userAnswer.slice(0, -1);
+answerDisplay.innerText = userAnswer;
+});
+function createConfetti() {
+const colors = ['#ffd700','#ff9800','#ff5722','#e91e63','#9c27b0','#3f51b5'];
+const confettiCount = 150;
+for(let i = 0; i < confettiCount; i++) {
+const confetti = document.createElement('div');
+confetti.className = 'confetti';
+confetti.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+confetti.style.left = `${Math.random()*100}vw`;
+confetti.style.top = `${Math.random()*(-50)}px`;
+confetti.style.width = `${Math.random()*10+5}px`;
+confetti.style.height = `${Math.random()*20+10}px`;
+confetti.style.transform = `rotate(${Math.random()*360}deg)`;
+confetti.style.animationDuration = `${Math.random()*3+2}s`;
+document.body.appendChild(confetti);
+setTimeout(() => confetti.remove(), 5000);
+}
+}
+function showLevelUpPopup() {
+const popup = document.createElement('div');
+popup.className = 'level-up-popup';
+popup.innerHTML = `<h2 class="popup-title">恭喜过关！🎉</h2><p class="popup-desc">${rewardTexts[currentLevel]}</p><p class="popup-desc">即将前往 ${levelNames[currentLevel+1]}</p>`;
+document.body.appendChild(popup);
+return popup;
+}
+function autoSubmit() {
+const qIndex = currentLevel * totalQuestionsPerLevel + currentQuestion;
+const correctAnswer = questionBank[qIndex][1];
+const inputNum = Number(userAnswer);
+if (userAnswer.length === String(correctAnswer).length || userAnswer.length === 2) {
+isChecking = true;
+if (inputNum === correctAnswer) {
+result.innerText = "答对啦！真棒👏";
+result.className = "result success";
+score++;
+playTipSound(successFreq);
+} else {
+result.innerText = `答错啦，正确答案是${correctAnswer}😜`;
+result.className = "result error";
+score = score > 0 ? score - 1 : 0;
+playTipSound(errorFreq);
+}
+scoreSpan.innerText = score;
+if (currentQuestion < totalQuestionsPerLevel - 1) {
+setTimeout(() => {
+currentQuestion++;
+initGame();
+}, answerDelay);
+} else {
+playTipSound(levelUpFreq);
+createStarAnimation();
+createConfetti();
+let popup;
+if(currentLevel < levelNames.length - 1) {
+popup = showLevelUpPopup();
+setTimeout(() => {
+popup.remove();
+currentLevel++;
+currentQuestion = 0;
+levelText.innerText = `当前关卡：${currentLevel + 1} ${levelNames[currentLevel]}`;
+initGame();
+}, levelUpDelay);
+} else {
+setTimeout(() => {
+playTipSound(finalFreq);
+createConfetti();
+showFinalPopup();
+}, levelUpDelay);
+}
+}
+}
+}
+function createStarAnimation() {
+const starCount = 30;
+for(let i = 0; i < starCount; i++) {
+const star = document.createElement("div");
+star.className = "star";
+star.innerText = "★";
+star.style.left = `${Math.random()*100}vw`;
+star.style.animationDelay = `${Math.random()*3}s`;
+document.body.appendChild(star);
+setTimeout(() => star.remove(), 3000);
+}
+}
+function showFinalPopup() {
+const popup = document.createElement("div");
+popup.className = "level-up-popup";
+popup.innerHTML = `<h2 class="popup-title">恭喜通关！🏆</h2><p class="popup-desc">你是数学小王者！</p><p class="popup-desc">累计获得 ${score} 颗星星</p><button class="btn" onclick="this.parentElement.remove()">太棒啦！</button>`;
+document.body.appendChild(popup);
+}
+</script>
 
-        // 初始化音频
-        function initAudio() {
-            if (audioContext) return; // 防止重复初始化
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            gainNode = audioContext.createGain();
-            gainNode.gain.value = isMuted ? 0 : 0.15;
-            gainNode.connect(audioContext.destination);
-            playBgMusic();
-            speakerIcon.innerText = isMuted ? "🔇" : "🔊";
-        }
-
-        // 播放背景音乐
-        function playBgMusic() {
-            if (!isMusicPlaying || !audioContext) return;
-            if (bgOscillator) {
-                try {
-                    bgOscillator.stop();
-                } catch (e) {}
-            }
-            bgOscillator = audioContext.createOscillator();
-            bgOscillator.type = "sine";
-            // 使用当前选中的旋律
-            bgOscillator.frequency.value = melodies[currentMelody][noteIndex];
-            bgOscillator.connect(gainNode);
-            
-            const startTime = audioContext.currentTime;
-            bgOscillator.start(startTime);
-            // 根据不同旋律调整播放时长，增强风格差异
-            const noteDuration = currentMelody === 2 ? 1.2 : 0.8; // 自然之声节奏更慢
-            bgOscillator.stop(startTime + noteDuration);
-            noteIndex = (noteIndex + 1) % melodies[currentMelody].length;
-            setTimeout(playBgMusic, noteDuration * 1000);
-        }
-
-        // 切换音乐
-        function switchMusic(musicId) {
-            currentMelody = musicId;
-            noteIndex = 0; // 重置音符索引
-            // 更新按钮状态
-            musicBtns.forEach(btn => {
-                if (parseInt(btn.dataset.music) === currentMelody) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            // 重新播放音乐
-            if (audioContext) {
-                playBgMusic();
-            }
-        }
-
-        function playTipSound(frequencies) {
-            if (isMuted || !audioContext) return;
-            let tipIndex = 0;
-            function playNote() {
-                const oscillator = audioContext.createOscillator();
-                oscillator.type = "sine";
-                oscillator.frequency.value = frequencies[tipIndex];
-                oscillator.connect(gainNode);
-                const startTime = audioContext.currentTime;
-                oscillator.start(startTime);
-                oscillator.stop(startTime + 0.2);
-                tipIndex++;
-                if (tipIndex < frequencies.length) {
-                    setTimeout(playNote, 200);
-                }
-            }
-            playNote();
-        }
-
-        function toggleMute() {
-            if (!audioContext) initAudio(); // 未初始化则先初始化
-            isMuted = !isMuted;
-            gainNode.gain.value = isMuted ? 0 : 0.15;
-            speakerIcon.innerText = isMuted ? "🔇" : "🔊";
-            if (!isMuted) musicTip.style.display = "none";
-        }
-
-        // 用户点击任意位置初始化音频
-        document.addEventListener("click", (e) => {
-            initAudio();
-            if (isMuted && e.target.id !== "speakerIcon" && !e.target.classList.contains('music-btn')) {
-                toggleMute();
-            }
-        });
-
-        speakerIcon.addEventListener("click", toggleMute);
-        
-        // 音乐切换按钮事件
-        musicBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                switchMusic(parseInt(btn.dataset.music));
-            });
-        });
-
-        // 初始化游戏
-        function initGame() {
-            const qIndex = currentLevel * totalQuestionsPerLevel + currentQuestion;
-            if (qIndex >= questionBank.length) return; // 防止越界
-            questionPart.innerText = questionBank[qIndex][0];
-            result.innerText = "";
-            userAnswer = "";
-            answerDisplay.innerText = ""; // 答案框默认空白
-            reward.classList.add("hidden");
-            isChecking = false;
-        }
-        // 页面加载后立即初始化游戏，显示第一题
-        initGame();
-
-        numBtns.forEach(btn => {
-            btn.addEventListener("click", () => {
-                if (isChecking) return;
-                const num = btn.innerText;
-                if (userAnswer === "" && num === "0") return; // 避免 leading zero
-                if (userAnswer.length >= 2) return;
-                userAnswer += num;
-                answerDisplay.innerText = userAnswer;
-                autoSubmit();
-            });
-        });
-
-        delBtn.addEventListener("click", () => {
-            if (isChecking) return;
-            userAnswer = userAnswer.slice(0, -1);
-            answerDisplay.innerText = userAnswer;
-        });
-
-        function createConfetti() {
-            const colors = ['#ffd700','#ff9800','#ff5722','#e91e63','#9c27b0','#3f51b5'];
-            const confettiCount = 150;
-            for(let i = 0; i < confettiCount; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
-                confetti.style.left = `${Math.random()*100}vw`;
-                confetti.style.top = `${Math.random()*(-50)}px`;
-                confetti.style.width = `${Math.random()*10+5}px`;
-                confetti.style.height = `${Math.random()*20+10}px`;
-                confetti.style.transform = `rotate(${Math.random()*360}deg)`;
-                confetti.style.animationDuration = `${Math.random()*3+2}s`;
-                document.body.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 5000);
-            }
-        }
-
-        function showLevelUpPopup() {
-            const popup = document.createElement('div');
-            popup.className = 'level-up-popup';
-            popup.innerHTML = `<h2 class="popup-title">恭喜过关！🎉</h2><p class="popup-desc">${rewardTexts[currentLevel]}</p><p class="popup-desc">即将前往 ${levelNames[currentLevel+1]}</p>`;
-            document.body.appendChild(popup);
-            return popup;
-        }
-
-        function autoSubmit() {
-            const qIndex = currentLevel * totalQuestionsPerLevel + currentQuestion;
-            const correctAnswer = questionBank[qIndex][1];
-            const inputNum = Number(userAnswer);
-            if (userAnswer.length === String(correctAnswer).length || userAnswer.length === 2) {
-                isChecking = true;
-                if (inputNum === correctAnswer) {
-                    result.innerText = "答对啦！真棒👏";
-                    result.className = "result success";
-                    score++;
-                    playTipSound(successFreq);
-                } else {
-                    result.innerText = `答错啦，正确答案是${correctAnswer}😜`;
-                    result.className = "result error";
-                    score = score > 0 ? score - 1 : 0;
-                    playTipSound(errorFreq);
-                }
-                scoreSpan.innerText = score;
-                if (currentQuestion < totalQuestionsPerLevel - 1) {
-                    setTimeout(() => {
-                        currentQuestion++;
-                        initGame();
-                    }, answerDelay);
-                } else {
-                    playTipSound(levelUpFreq);
-                    createStarAnimation();
-                    createConfetti();
-                    let popup;
-                    if(currentLevel < levelNames.length - 1) {
-                        popup = showLevelUpPopup();
-                        setTimeout(() => {
-                            popup.remove();
-                            currentLevel++;
-                            currentQuestion = 0;
-                            levelText.innerText = `当前关卡：${currentLevel + 1} ${levelNames[currentLevel]}`;
-                            initGame();
-                        }, levelUpDelay);
-                    } else {
-                        setTimeout(() => {
-                            playTipSound(finalFreq);
-                            createConfetti();
-                            showFinalPopup();
-                        }, levelUpDelay);
-                    }
-                }
-            }
-        }
-
-        function createStarAnimation() {
-            const starCount = 30;
-            for(let i = 0; i < starCount; i++) {
-                const star = document.createElement("div");
-                star.className = "star";
-                star.innerText = "★";
-                star.style.left = `${Math.random()*100}vw`;
-                star.style.animationDelay = `${Math.random()*3}s`;
-                document.body.appendChild(star);
-                setTimeout(() => star.remove(), 3000);
-            }
-        }
-
-        function showFinalPopup() {
-            const popup = document.createElement("div");
-            popup.className = "level-up-popup";
-            popup.innerHTML = `<h2 class="popup-title">恭喜通关！🏆</h2><p class="popup-desc">你是数学小王者！</p><p class="popup-desc">累计获得 ${score} 颗星星</p><button class="btn" onclick="this.parentElement.remove()">太棒啦！</button>`;
-            document.body.appendChild(popup);
-        }
-    </script>
-</body>
-</html>
+</body></html>
