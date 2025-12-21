@@ -780,18 +780,18 @@
             let penetrateTime = 0;
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-            // 关卡配置
+            // 关卡配置 - 修复：调整关卡配置
             const STAGE_CONFIG = {
-                1: { name: "训练关", waves: 3, target: 200, enemyTypes: ['NORMAL'], boss: false },
-                2: { name: "太空航道", waves: 4, target: 500, enemyTypes: ['NORMAL', 'FAST'], boss: false },
-                3: { name: "小行星带", waves: 4, target: 800, enemyTypes: ['NORMAL', 'FAST', 'ARMORED'], boss: false },
-                4: { name: "敌前哨站", waves: 5, target: 1200, enemyTypes: ['FAST', 'ARMORED'], boss: false },
-                5: { name: "BOSS:侦察母舰", waves: 1, target: 1500, enemyTypes: ['BOSS'], boss: true },
-                6: { name: "深空追击", waves: 5, target: 2000, enemyTypes: ['NORMAL', 'FAST', 'ARMORED'], boss: false },
-                7: { name: "敌方舰队", waves: 6, target: 2500, enemyTypes: ['FAST', 'ARMORED'], boss: false },
-                8: { name: "星云战场", waves: 6, target: 3000, enemyTypes: ['NORMAL', 'FAST', 'ARMORED'], boss: false },
-                9: { name: "虫洞防御", waves: 7, target: 3500, enemyTypes: ['FAST', 'ARMORED'], boss: false },
-                10: { name: "BOSS:战列舰", waves: 1, target: 4000, enemyTypes: ['BOSS'], boss: true }
+                1: { name: "训练关", waves: 2, target: 200, enemyTypes: ['NORMAL'], boss: false, enemyCount: 5 },
+                2: { name: "太空航道", waves: 2, target: 400, enemyTypes: ['NORMAL', 'FAST'], boss: false, enemyCount: 8 },
+                3: { name: "小行星带", waves: 2, target: 600, enemyTypes: ['NORMAL', 'FAST', 'ARMORED'], boss: false, enemyCount: 10 },
+                4: { name: "敌前哨站", waves: 3, target: 800, enemyTypes: ['FAST', 'ARMORED'], boss: false, enemyCount: 12 },
+                5: { name: "BOSS:侦察母舰", waves: 1, target: 1000, enemyTypes: ['BOSS'], boss: true, enemyCount: 1 },
+                6: { name: "深空追击", waves: 3, target: 1200, enemyTypes: ['NORMAL', 'FAST', 'ARMORED'], boss: false, enemyCount: 15 },
+                7: { name: "敌方舰队", waves: 3, target: 1500, enemyTypes: ['FAST', 'ARMORED'], boss: false, enemyCount: 18 },
+                8: { name: "星云战场", waves: 4, target: 1800, enemyTypes: ['NORMAL', 'FAST', 'ARMORED'], boss: false, enemyCount: 20 },
+                9: { name: "虫洞防御", waves: 4, target: 2200, enemyTypes: ['FAST', 'ARMORED'], boss: false, enemyCount: 22 },
+                10: { name: "BOSS:战列舰", waves: 1, target: 2500, enemyTypes: ['BOSS'], boss: true, enemyCount: 1 }
             };
 
             // 难度系数（随关卡提升）
@@ -833,7 +833,7 @@
                 stageNotice.style.display = 'block';
             }
 
-            // 开始新关卡
+            // 开始新关卡 - 修复：简化关卡开始逻辑
             function startNewStage() {
                 const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
                 wavesInStage = config.waves;
@@ -846,6 +846,14 @@
                 stageCompleted = false;
                 bossSpawned = false;
                 
+                // 清空所有敌人和子弹
+                enemies = [];
+                enemyBullets = [];
+                explosions = [];
+                
+                // 重置敌人生成计时器
+                enemySpawnTimer = 0;
+                
                 // 更新难度
                 DIFFICULTY_CONFIG = getStageDifficulty(stage);
                 
@@ -856,25 +864,53 @@
                 startNextWave();
             }
 
-            // 开始下一波敌人
+            // 开始下一波敌人 - 修复：简化波次生成逻辑
             function startNextWave() {
-                if (currentWave < wavesInStage) {
-                    currentWave++;
-                    const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
-                    const waveMultiplier = 1 + (currentWave - 1) * 0.3;
-                    
-                    // 每波敌人数增加
-                    enemiesToSpawn = 5 + Math.floor(currentWave * 2 * waveMultiplier);
-                    enemiesInCurrentWave = 0;
-                    waveSpawning = true;
-                    
-                    showPropTip(canvas.width/2, canvas.height/2, `第 ${currentWave}/${wavesInStage} 波敌人`);
+                if (currentWave >= wavesInStage) {
+                    // 所有波次已完成
+                    return;
+                }
+                
+                currentWave++;
+                const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
+                
+                // 每波敌人数量
+                enemiesToSpawn = config.enemyCount + (currentWave - 1) * 2;
+                enemiesInCurrentWave = 0;
+                waveSpawning = true;
+                
+                // 重置生成计时器
+                enemySpawnTimer = 0;
+                
+                showPropTip(canvas.width/2, canvas.height/2, `第 ${currentWave}/${wavesInStage} 波敌人`);
+                
+                // 如果是BOSS关，直接生成BOSS
+                if (config.boss && !bossSpawned) {
+                    const bossHp = ENEMY_TYPES.BOSS.hp * DIFFICULTY_CONFIG.hpMultiplier + (stage - 1) * DIFFICULTY_CONFIG.bossHpFactor;
+                    enemies.push({
+                        type: ENEMY_TYPES.BOSS,
+                        x: canvas.width / 2 - ENEMY_TYPES.BOSS.size/2,
+                        y: -ENEMY_TYPES.BOSS.size,
+                        width: ENEMY_TYPES.BOSS.size,
+                        height: ENEMY_TYPES.BOSS.size,
+                        speed: ENEMY_TYPES.BOSS.speed,
+                        hp: bossHp,
+                        score: ENEMY_TYPES.BOSS.score,
+                        shootTimer: 0
+                    });
+                    bossSpawned = true;
+                    enemiesInCurrentWave = enemiesToSpawn; // BOSS关只有1个敌人
+                    waveSpawning = false;
+                    showPropTip(canvas.width/2, 100, `BOSS出现！`);
                 }
             }
 
-            // 检查关卡完成
+            // 检查关卡完成 - 修复：简化关卡完成逻辑
             function checkStageComplete() {
-                if (!stageCompleted && stageScore >= stageTargetScore && enemies.length === 0 && !waveSpawning) {
+                if (stageCompleted) return;
+                
+                // 如果达到目标分数且没有敌人了
+                if (stageScore >= stageTargetScore && enemies.length === 0) {
                     stageCompleted = true;
                     
                     // 关卡完成奖励
@@ -893,6 +929,14 @@
                     setTimeout(() => {
                         stage++;
                         maxStage = Math.max(maxStage, stage);
+                        
+                        // 如果超过10关，回到第1关但增加难度
+                        if (stage > 10) {
+                            stage = 1;
+                            // 增加难度循环
+                            showPropTip(canvas.width/2, canvas.height/2, "进入无尽模式！难度提升！");
+                        }
+                        
                         showStageNotice();
                     }, 1500);
                 }
@@ -901,13 +945,12 @@
             // 事件监听
             window.addEventListener('resize', resizeCanvas);
             
-            // 键盘事件监听 - 修复：确保全局监听
+            // 键盘事件监听
             document.addEventListener('keydown', (e) => {
-                keys[e.key] = true;
-                // 防止空格键滚动页面
-                if (e.key === ' ' || e.key === 'Spacebar') {
-                    e.preventDefault();
+                if (e.key === ' ') {
+                    e.preventDefault(); // 防止空格键滚动页面
                 }
+                keys[e.key] = true;
                 if (e.key === 'b' && propsInventory.length > 0) {
                     useStoredProp();
                 }
@@ -932,13 +975,16 @@
             // 道具使用按钮
             propUseBtn.addEventListener('click', useStoredProp);
 
-            // 关卡继续按钮 - 修复：启动游戏循环
+            // 关卡继续按钮
             stageContinueBtn.addEventListener('click', () => {
                 stageNotice.style.display = 'none';
                 gameRunning = true;
                 startNewStage();
-                // 修复：启动游戏循环
-                requestAnimationFrame(gameLoop);
+                // 启动游戏循环
+                if (!gameLoopRunning) {
+                    gameLoopRunning = true;
+                    requestAnimationFrame(gameLoop);
+                }
             });
 
             // 绘制玩家飞机
@@ -1076,69 +1122,54 @@
                 });
             }
 
-            // 生成敌机
+            // 生成敌机 - 修复：简化敌机生成逻辑
             function spawnEnemy() {
+                if (!waveSpawning) return;
+                
                 const config = STAGE_CONFIG[Math.min(stage, 10)] || STAGE_CONFIG[10];
                 
-                // 如果正在生成敌人
-                if (waveSpawning && enemiesInCurrentWave < enemiesToSpawn) {
-                    // 生成当前关卡的敌机类型
-                    const availableTypes = config.enemyTypes;
-                    const typeName = availableTypes[Math.floor(Math.random() * availableTypes.length)];
-                    const enemyType = ENEMY_TYPES[typeName];
-                    
-                    // 如果是BOSS关且还没生成BOSS
-                    if (config.boss && !bossSpawned && typeName === 'BOSS') {
-                        const bossHp = enemyType.hp * DIFFICULTY_CONFIG.hpMultiplier + (stage - 1) * DIFFICULTY_CONFIG.bossHpFactor;
-                        enemies.push({
-                            type: enemyType,
-                            x: canvas.width / 2 - enemyType.size/2,
-                            y: -enemyType.size,
-                            width: enemyType.size,
-                            height: enemyType.size,
-                            speed: enemyType.speed,
-                            hp: bossHp,
-                            score: enemyType.score,
-                            shootTimer: 0
-                        });
-                        bossSpawned = true;
-                        showPropTip(canvas.width/2, 100, `BOSS出现！`);
-                    } 
-                    // 普通敌机
-                    else if (typeName !== 'BOSS') {
-                        const size = enemyType.size + Math.random() * 10;
-                        const speed = enemyType.speed * DIFFICULTY_CONFIG.speedMultiplier;
-                        const hp = Math.floor(enemyType.hp * DIFFICULTY_CONFIG.hpMultiplier);
-
-                        enemies.push({
-                            type: enemyType,
-                            x: Math.random() * (canvas.width - size),
-                            y: -size,
-                            width: size,
-                            height: size,
-                            speed: speed,
-                            hp: hp,
-                            score: enemyType.score,
-                            shootTimer: 0
-                        });
-                    }
-                    
-                    enemiesInCurrentWave++;
-                    
-                    // 检查是否生成本波所有敌人
-                    if (enemiesInCurrentWave >= enemiesToSpawn) {
-                        waveSpawning = false;
-                    }
+                // 如果已经生成足够数量的敌人
+                if (enemiesInCurrentWave >= enemiesToSpawn) {
+                    waveSpawning = false;
+                    return;
                 }
                 
-                // 等级提升逻辑
-                const levelUpScore = DIFFICULTY_CONFIG.levelUpBase + (level - 1) * DIFFICULTY_CONFIG.levelUpFactor;
-                if (score >= levelUpScore && level < 10) {
-                    level++;
-                    levelElement.textContent = level;
-                    showPropTip(canvas.width/2, canvas.height/2, `等级提升！${level}级`);
-                    playSound(levelUpSound);
-                    playBeep(1000, 100);
+                // BOSS关已经处理过了
+                if (config.boss) return;
+                
+                // 每30帧生成一个敌人（可根据难度调整）
+                enemySpawnTimer++;
+                if (enemySpawnTimer % Math.max(20, 40 - stage * 2) !== 0) {
+                    return;
+                }
+                
+                // 生成当前关卡的敌机类型
+                const availableTypes = config.enemyTypes;
+                const typeName = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+                const enemyType = ENEMY_TYPES[typeName];
+                
+                // 计算敌机属性
+                const size = enemyType.size + Math.random() * 10;
+                const speed = enemyType.speed * DIFFICULTY_CONFIG.speedMultiplier;
+                const hp = Math.floor(enemyType.hp * DIFFICULTY_CONFIG.hpMultiplier);
+
+                enemies.push({
+                    type: enemyType,
+                    x: Math.random() * (canvas.width - size),
+                    y: -size,
+                    width: size,
+                    height: size,
+                    speed: speed,
+                    hp: hp,
+                    score: enemyType.score,
+                    shootTimer: 0
+                });
+                
+                enemiesInCurrentWave++;
+                
+                // 检查是否生成本波所有敌人
+                if (enemiesInCurrentWave >= enemiesToSpawn) {
+                    waveSpawning = false;
                 }
             }
 
@@ -1507,6 +1538,7 @@
             // 游戏结束
             function gameOverFunc() {
                 gameRunning = false;
+                gameLoopRunning = false;
                 finalScoreElement.textContent = score;
                 finalStageElement.textContent = maxStage;
                 finalKillsElement.textContent = totalKills;
@@ -1616,16 +1648,17 @@
             }
 
             // 游戏主循环
+            let gameLoopRunning = false;
             function gameLoop() {
                 if (!gameRunning) {
-                    // 即使游戏暂停，也继续调用循环以检测恢复
+                    // 如果游戏没有运行，但循环还在继续，我们需要继续调用
                     requestAnimationFrame(gameLoop);
                     return;
                 }
 
                 drawBackground();
 
-                // 玩家移动 - 修复：确保移动逻辑正确
+                // 玩家移动
                 if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= player.speed;
                 if (keys['ArrowRight'] || keys['d'] || keys['D']) player.x += player.speed;
                 if (keys['ArrowUp'] || keys['w'] || keys['W']) player.y -= player.speed;
@@ -1633,7 +1666,7 @@
 
                 // 射击控制
                 if (keys[' '] || keys['Spacebar'] || keys['Space']) shoot();
-                if (autoShoot && gameRunning) {
+                if (autoShoot) {
                     const now = Date.now();
                     if (now - lastAutoShootTime > SHOOT_INTERVAL_MOBILE) {
                         shoot();
@@ -1684,16 +1717,18 @@
                     if (penetrateTime <= 0) penetrateBullet = false;
                 }
 
-                // 生成敌机 - 修复：确保敌机生成逻辑正确
-                enemySpawnTimer++;
-                
-                // 简化敌机生成逻辑：每帧都有概率生成
-                if (waveSpawning && enemiesInCurrentWave < enemiesToSpawn) {
-                    // 增加生成频率
-                    if (enemySpawnTimer % Math.max(10, 30 - stage) === 0) {
-                        spawnEnemy();
-                    }
+                // 等级提升逻辑
+                const levelUpScore = DIFFICULTY_CONFIG.levelUpBase + (level - 1) * DIFFICULTY_CONFIG.levelUpFactor;
+                if (score >= levelUpScore && level < 10) {
+                    level++;
+                    levelElement.textContent = level;
+                    showPropTip(canvas.width/2, canvas.height/2, `等级提升！${level}级`);
+                    playSound(levelUpSound);
+                    playBeep(1000, 100);
                 }
+
+                // 生成敌机
+                spawnEnemy();
 
                 // 绘制所有元素
                 drawPlayer();
@@ -1706,9 +1741,8 @@
                 // 碰撞检测
                 checkCollisions();
                 
-                // 检查波次完成
+                // 检查波次完成，开始下一波
                 if (!waveSpawning && enemies.length === 0 && currentWave < wavesInStage) {
-                    // 延迟一下再开始下一波
                     setTimeout(() => {
                         startNextWave();
                     }, 1000);
