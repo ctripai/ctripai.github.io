@@ -502,9 +502,9 @@
                 player: '#6699ff',
                 playerGlow: '#3366ff',
                 bullet: '#ff6666',
-                enemy1: '#ff9966',
-                enemy2: '#66cc99',
-                enemy3: '#cc66ff',
+                enemy1: '#ff9966',      // 橙色外星飞船
+                enemy2: '#66cc99',      // 绿色外星小怪物
+                enemy3: '#cc66ff',      // 紫色外星飞船
                 boss: '#ff3333',
                 prop1: '#ffcc00',
                 prop2: '#66ff66',
@@ -810,7 +810,10 @@
                     color: color,
                     hp: 1,
                     value: 10,
-                    blink: 0
+                    blink: 0,
+                    // 添加敌人类型：0=外星飞船，1=外星小怪物，2=另一种外星飞船
+                    type: Math.floor(Math.random() * 3),
+                    rotation: Math.random() * Math.PI * 2
                 };
                 
                 enemies.push(enemy);
@@ -929,6 +932,7 @@
                     const enemy = enemies[i];
                     enemy.y += enemy.speed;
                     enemy.blink += 0.1;
+                    enemy.rotation += 0.02; // 添加旋转动画
                     
                     // 检查是否碰到玩家
                     if (!player.invincible &&
@@ -1358,6 +1362,11 @@
                 enemies.forEach(enemy => {
                     ctx.save();
                     
+                    // 移动到敌人中心并旋转
+                    ctx.translate(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+                    ctx.rotate(enemy.rotation);
+                    
+                    // 设置阴影和透明度
                     ctx.shadowColor = enemy.color;
                     ctx.shadowBlur = 20;
                     
@@ -1365,31 +1374,220 @@
                         ctx.globalAlpha = 0.8;
                     }
                     
-                    ctx.fillStyle = enemy.color;
-                    ctx.beginPath();
-                    ctx.ellipse(
-                        enemy.x + enemy.width/2,
-                        enemy.y + enemy.height/2,
-                        enemy.width/2,
-                        enemy.height/2,
-                        0, 0, Math.PI * 2
-                    );
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.beginPath();
-                    ctx.arc(enemy.x + enemy.width/3, enemy.y + enemy.height/3, 6, 0, Math.PI * 2);
-                    ctx.arc(enemy.x + enemy.width*2/3, enemy.y + enemy.height/3, 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.strokeStyle = '#FFFFFF';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(enemy.x + enemy.width/2, enemy.y + enemy.height*2/3, 8, 0.2, Math.PI - 0.2);
-                    ctx.stroke();
+                    // 根据敌人类型绘制不同的外观
+                    switch(enemy.type) {
+                        case 0: // 外星飞船（飞碟型）
+                            drawUFO(enemy);
+                            break;
+                        case 1: // 外星小怪物
+                            drawAlienMonster(enemy);
+                            break;
+                        case 2: // 另一种外星飞船（三角型）
+                            drawTriangleShip(enemy);
+                            break;
+                    }
                     
                     ctx.restore();
                 });
+            }
+            
+            // 绘制飞碟型外星飞船
+            function drawUFO(enemy) {
+                const width = enemy.width;
+                const height = enemy.height;
+                
+                // 飞碟主体（椭圆形）
+                const bodyGradient = ctx.createRadialGradient(
+                    0, 0, 0,
+                    0, 0, width/2
+                );
+                bodyGradient.addColorStop(0, enemy.color);
+                bodyGradient.addColorStop(1, darkenColor(enemy.color, 0.3));
+                
+                ctx.fillStyle = bodyGradient;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, width/2, height/3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 飞碟顶部（圆顶）
+                const domeGradient = ctx.createRadialGradient(
+                    0, -height/6, 0,
+                    0, -height/6, width/3
+                );
+                domeGradient.addColorStop(0, lightenColor(enemy.color, 0.3));
+                domeGradient.addColorStop(1, enemy.color);
+                
+                ctx.fillStyle = domeGradient;
+                ctx.beginPath();
+                ctx.arc(0, -height/6, width/3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 飞碟灯光
+                ctx.fillStyle = '#FFFFFF';
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2;
+                    const lightX = Math.cos(angle) * width/3;
+                    const lightY = Math.sin(angle) * height/4;
+                    
+                    ctx.beginPath();
+                    ctx.arc(lightX, lightY, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // 飞碟底部细节
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, width/2, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            // 绘制外星小怪物
+            function drawAlienMonster(enemy) {
+                const width = enemy.width;
+                const height = enemy.height;
+                
+                // 怪物身体（圆形）
+                const bodyGradient = ctx.createRadialGradient(
+                    0, 0, 0,
+                    0, 0, width/2
+                );
+                bodyGradient.addColorStop(0, enemy.color);
+                bodyGradient.addColorStop(1, darkenColor(enemy.color, 0.3));
+                
+                ctx.fillStyle = bodyGradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, width/2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 怪物眼睛
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(-width/4, -height/6, width/8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(width/4, -height/6, width/8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 怪物眼珠
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(-width/4, -height/6, width/16, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(width/4, -height/6, width/16, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 怪物嘴巴
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, height/8, width/6, 0.2, Math.PI - 0.2);
+                ctx.stroke();
+                
+                // 怪物触角
+                for (let i = 0; i < 3; i++) {
+                    const angle = -Math.PI/4 + (i * Math.PI/4);
+                    const x = Math.cos(angle) * width/2;
+                    const y = Math.sin(angle) * height/2 - height/3;
+                    
+                    ctx.strokeStyle = enemy.color;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -height/3);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = lightenColor(enemy.color, 0.5);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // 绘制三角型外星飞船
+            function drawTriangleShip(enemy) {
+                const width = enemy.width;
+                const height = enemy.height;
+                
+                // 飞船主体（三角形）
+                const bodyGradient = ctx.createLinearGradient(
+                    0, -height/2,
+                    0, height/2
+                );
+                bodyGradient.addColorStop(0, enemy.color);
+                bodyGradient.addColorStop(1, darkenColor(enemy.color, 0.3));
+                
+                ctx.fillStyle = bodyGradient;
+                ctx.beginPath();
+                ctx.moveTo(0, -height/2);
+                ctx.lineTo(-width/2, height/2);
+                ctx.lineTo(width/2, height/2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // 飞船细节装饰
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, -height/2);
+                ctx.lineTo(-width/2, height/2);
+                ctx.lineTo(width/2, height/2);
+                ctx.closePath();
+                ctx.stroke();
+                
+                // 飞船引擎
+                ctx.fillStyle = '#FF6666';
+                ctx.beginPath();
+                ctx.ellipse(0, height/2, width/4, height/6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 飞船窗户
+                ctx.fillStyle = '#99CCFF';
+                ctx.beginPath();
+                ctx.arc(0, -height/4, width/6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(0, -height/4, width/8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 辅助函数：变暗颜色
+            function darkenColor(color, factor) {
+                // 简单实现：将颜色变暗
+                if (color.startsWith('#')) {
+                    let r = parseInt(color.substr(1, 2), 16);
+                    let g = parseInt(color.substr(3, 2), 16);
+                    let b = parseInt(color.substr(5, 2), 16);
+                    
+                    r = Math.floor(r * (1 - factor));
+                    g = Math.floor(g * (1 - factor));
+                    b = Math.floor(b * (1 - factor));
+                    
+                    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+                }
+                return color;
+            }
+            
+            // 辅助函数：变亮颜色
+            function lightenColor(color, factor) {
+                // 简单实现：将颜色变亮
+                if (color.startsWith('#')) {
+                    let r = parseInt(color.substr(1, 2), 16);
+                    let g = parseInt(color.substr(3, 2), 16);
+                    let b = parseInt(color.substr(5, 2), 16);
+                    
+                    r = Math.min(255, Math.floor(r + (255 - r) * factor));
+                    g = Math.min(255, Math.floor(g + (255 - g) * factor));
+                    b = Math.min(255, Math.floor(b + (255 - b) * factor));
+                    
+                    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+                }
+                return color;
             }
             
             function drawBullets() {
