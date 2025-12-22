@@ -469,16 +469,28 @@
             // 检测设备类型
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            // 儿童友好游戏变量
+            // 游戏状态变量
             let score = 0;
-            let life = 5;  // 增加初始生命值
+            let life = 5;
             let stage = 1;
             let totalKills = 0;
             let gameRunning = false;
             let gameLoopRunning = false;
-            let autoShoot = true;  // 默认自动射击
-            let easyMode = true;  // 默认简单模式
-            let showMathTips = true;  // 默认显示数学提示
+            
+            // 性能优化：游戏设置
+            const SETTINGS = {
+                autoShoot: true,
+                easyMode: true,
+                showMathTips: true,
+                // 性能优化设置
+                maxEnemies: 30,           // 最大同时存在的敌人数
+                maxBullets: 100,          // 最大同时存在的子弹数
+                maxExplosions: 20,        // 最大同时存在的爆炸效果数
+                maxProps: 10,             // 最大同时存在的道具数
+                bulletShootRate: 0.25,    // 射击频率
+                enemySpawnRate: 1500,     // 敌人生成间隔（毫秒）
+                maxStars: 100             // 最大星星数
+            };
             
             // 触摸控制变量
             let touchX = 0;
@@ -488,23 +500,14 @@
             // 键盘控制变量（PC端）
             let keys = {};
             
-            // 成就系统
-            const achievements = {
-                firstKill: { earned: false, title: "第一次消灭敌人", icon: "🎯", message: "你消灭了第一个外星敌人！真棒！" },
-                fiveKills: { earned: false, title: "消灭5个敌人", icon: "⭐", message: "已经消灭5个敌人了！继续加油！" },
-                firstStage: { earned: false, title: "通过第一关", icon: "🚀", message: "恭喜你通过第一关！你是个小英雄！" },
-                tenKills: { earned: false, title: "消灭10个敌人", icon: "🏆", message: "消灭了10个敌人！太厉害了！" },
-                highScore: { earned: false, title: "创造新纪录", icon: "👑", message: "你创造了新的最高分！真了不起！" }
-            };
-            
-            // 颜色主题 - 使用护眼配色
+            // 颜色主题
             const COLORS = {
                 player: '#6699ff',
                 playerGlow: '#3366ff',
                 bullet: '#ff6666',
-                enemy1: '#ff9966',      // 橙色外星飞船
-                enemy2: '#66cc99',      // 绿色外星小怪物
-                enemy3: '#cc66ff',      // 紫色外星飞船
+                enemy1: '#ff9966',
+                enemy2: '#66cc99',
+                enemy3: '#cc66ff',
                 boss: '#ff3333',
                 prop1: '#ffcc00',
                 prop2: '#66ff66',
@@ -513,7 +516,7 @@
                 stars: '#CCCCFF'
             };
             
-            // 游戏元素
+            // 游戏元素（使用对象池优化）
             let player = {
                 x: 0, y: 0,
                 width: 60, height: 80,
@@ -521,15 +524,26 @@
                 invincible: false,
                 invincibleTime: 0,
                 fireLevel: 1,
-                bullets: [],
                 engineGlow: 0
             };
             
+            // 使用固定大小的数组作为对象池
             let enemies = [];
             let bullets = [];
             let props = [];
             let explosions = [];
             let stars = [];
+            
+            // 计时器引用（用于清理）
+            let enemySpawnTimer = null;
+            
+            // ========== 性能监控 ==========
+            function logPerformance() {
+                console.log(`性能统计 - 敌人: ${enemies.length}, 子弹: ${bullets.length}, 爆炸: ${explosions.length}, 道具: ${props.length}`);
+            }
+            
+            // 每30秒记录一次性能数据（仅在开发时使用）
+            // setInterval(logPerformance, 30000);
             
             // ========== 修复手机端开始游戏无响应问题 ==========
             function setupStartButton() {
@@ -552,7 +566,10 @@
                 startScreen.style.display = 'none';
                 gameContainer.style.display = 'flex';
                 
-                // 立即开始游戏
+                // 清理之前的游戏状态
+                cleanupGame();
+                
+                // 开始新游戏
                 resizeCanvas();
                 resetGame();
                 startGame();
@@ -560,6 +577,26 @@
                 
                 // 确保画布获得焦点
                 canvas.focus();
+            }
+            
+            // ========== 清理游戏资源 ==========
+            function cleanupGame() {
+                // 清除所有计时器
+                if (enemySpawnTimer) {
+                    clearInterval(enemySpawnTimer);
+                    enemySpawnTimer = null;
+                }
+                
+                // 清空所有游戏对象数组
+                enemies.length = 0;
+                bullets.length = 0;
+                props.length = 0;
+                explosions.length = 0;
+                stars.length = 0;
+                
+                // 重置游戏状态
+                gameRunning = false;
+                gameLoopRunning = false;
             }
             
             // ========== 触摸控制功能 ==========
@@ -641,7 +678,7 @@
             
             // ========== 数学学习提示 ==========
             function showMathTip(x, y, text) {
-                if (!showMathTips) return;
+                if (!SETTINGS.showMathTips) return;
                 
                 const tip = document.createElement('div');
                 tip.className = 'math-tip';
@@ -651,6 +688,7 @@
                 
                 gameContainer.appendChild(tip);
                 
+                // 2秒后自动移除提示
                 setTimeout(() => {
                     if (tip.parentNode) {
                         tip.parentNode.removeChild(tip);
@@ -675,7 +713,7 @@
             // ========== 星星背景 ==========
             function createStars() {
                 stars = [];
-                const starCount = Math.min(150, Math.floor((canvas.width * canvas.height) / 1000));
+                const starCount = Math.min(SETTINGS.maxStars, Math.floor((canvas.width * canvas.height) / 1000));
                 
                 for (let i = 0; i < starCount; i++) {
                     stars.push({
@@ -740,23 +778,18 @@
                     invincible: false,
                     invincibleTime: 0,
                     fireLevel: 1,
-                    bullets: [],
                     engineGlow: 0
                 };
                 
-                enemies = [];
-                bullets = [];
-                props = [];
-                explosions = [];
+                // 清空所有游戏对象
+                enemies.length = 0;
+                bullets.length = 0;
+                props.length = 0;
+                explosions.length = 0;
                 keys = {};
                 
                 // 更新UI
                 updateUI();
-                
-                // 重置成就检查
-                Object.values(achievements).forEach(achievement => {
-                    achievement.earned = false;
-                });
             }
             
             function updateUI() {
@@ -766,37 +799,36 @@
                 document.getElementById('killsKid').textContent = totalKills;
             }
             
+            // ========== 敌人生成（优化版） ==========
             function startEnemySpawning() {
-                // 简单模式：敌人数量更少，移动更慢
-                const enemyCount = easyMode ? 3 + stage : 5 + stage;
-                const spawnInterval = easyMode ? 2000 : 1500;
+                // 清除之前的计时器
+                if (enemySpawnTimer) {
+                    clearInterval(enemySpawnTimer);
+                }
                 
-                let enemiesSpawned = 0;
-                
-                const spawnEnemy = setInterval(() => {
+                enemySpawnTimer = setInterval(() => {
                     if (!gameRunning) {
-                        clearInterval(spawnEnemy);
+                        clearInterval(enemySpawnTimer);
                         return;
                     }
                     
-                    if (enemiesSpawned >= enemyCount) {
-                        clearInterval(spawnEnemy);
-                        // 所有敌人生成后，等待一段时间再开始下一波
-                        setTimeout(() => {
-                            if (gameRunning) {
-                                startEnemySpawning();
-                            }
-                        }, 3000);
-                        return;
+                    // 根据当前关卡调整敌人生成频率
+                    const spawnRate = Math.max(300, SETTINGS.enemySpawnRate - stage * 50);
+                    
+                    // 检查当前敌人数是否超过限制
+                    if (enemies.length < SETTINGS.maxEnemies) {
+                        createEnemy();
                     }
                     
-                    createEnemy();
-                    enemiesSpawned++;
-                    
-                }, spawnInterval);
+                }, SETTINGS.enemySpawnRate);
             }
             
             function createEnemy() {
+                // 检查敌人数是否已达上限
+                if (enemies.length >= SETTINGS.maxEnemies) {
+                    return;
+                }
+                
                 const size = 40 + Math.random() * 20;
                 const colors = [COLORS.enemy1, COLORS.enemy2, COLORS.enemy3];
                 const color = colors[Math.floor(Math.random() * colors.length)];
@@ -806,12 +838,11 @@
                     y: -size,
                     width: size,
                     height: size,
-                    speed: (easyMode ? 1 : 2) + Math.random() * 2,
+                    speed: (SETTINGS.easyMode ? 1 : 2) + Math.random() * 2,
                     color: color,
                     hp: 1,
-                    value: 10,
+                    value: 10 + Math.floor(stage / 3) * 5, // 分数随关卡增加
                     blink: 0,
-                    // 添加敌人类型：0=外星飞船，1=外星小怪物，2=另一种外星飞船
                     type: Math.floor(Math.random() * 3),
                     rotation: Math.random() * Math.PI * 2
                 };
@@ -819,66 +850,69 @@
                 enemies.push(enemy);
             }
             
+            // ========== 子弹管理（优化版） ==========
             function createBullet() {
-                if (autoShoot) {
-                    const bullet = {
-                        x: player.x + player.width / 2 - 5,
-                        y: player.y,
-                        width: 10,
-                        height: 20,
-                        speed: 15,
-                        damage: 1 + player.fireLevel
-                    };
+                if (!SETTINGS.autoShoot || bullets.length >= SETTINGS.maxBullets) {
+                    return;
+                }
+                
+                const baseBullet = {
+                    x: player.x + player.width / 2 - 5,
+                    y: player.y,
+                    width: 10,
+                    height: 20,
+                    speed: 15,
+                    damage: 1 + player.fireLevel
+                };
+                
+                // 添加主子弹
+                if (bullets.length < SETTINGS.maxBullets) {
+                    bullets.push({...baseBullet});
+                }
+                
+                // 根据火力等级创建额外子弹
+                if (player.fireLevel >= 2 && bullets.length < SETTINGS.maxBullets) {
+                    bullets.push({
+                        ...baseBullet,
+                        x: player.x + 10
+                    });
                     
-                    bullets.push(bullet);
-                    
-                    // 根据火力等级创建额外子弹
-                    if (player.fireLevel >= 2) {
+                    if (bullets.length < SETTINGS.maxBullets) {
                         bullets.push({
-                            x: player.x + 10,
-                            y: player.y,
-                            width: 10,
-                            height: 20,
-                            speed: 15,
-                            damage: 1 + player.fireLevel
-                        });
-                        
-                        bullets.push({
-                            x: player.x + player.width - 20,
-                            y: player.y,
-                            width: 10,
-                            height: 20,
-                            speed: 15,
-                            damage: 1 + player.fireLevel
+                            ...baseBullet,
+                            x: player.x + player.width - 20
                         });
                     }
+                }
+                
+                if (player.fireLevel >= 3 && bullets.length < SETTINGS.maxBullets) {
+                    bullets.push({
+                        ...baseBullet,
+                        x: player.x + 20,
+                        y: player.y + 10
+                    });
                     
-                    if (player.fireLevel >= 3) {
+                    if (bullets.length < SETTINGS.maxBullets) {
                         bullets.push({
-                            x: player.x + 20,
-                            y: player.y + 10,
-                            width: 10,
-                            height: 20,
-                            speed: 15,
-                            damage: 1 + player.fireLevel
-                        });
-                        
-                        bullets.push({
+                            ...baseBullet,
                             x: player.x + player.width - 30,
-                            y: player.y + 10,
-                            width: 10,
-                            height: 20,
-                            speed: 15,
-                            damage: 1 + player.fireLevel
+                            y: player.y + 10
                         });
                     }
                 }
             }
             
             function updateBullets() {
+                // 使用倒序遍历以便安全删除
                 for (let i = bullets.length - 1; i >= 0; i--) {
                     const bullet = bullets[i];
                     bullet.y -= bullet.speed;
+                    
+                    // 检查子弹是否飞出屏幕
+                    if (bullet.y < -20 || bullet.y > canvas.height) {
+                        bullets.splice(i, 1);
+                        continue;
+                    }
                     
                     // 检查是否击中敌人
                     let hit = false;
@@ -895,17 +929,14 @@
                             
                             if (enemy.hp <= 0) {
                                 // 敌人被消灭
-                                createExplosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+                                createExplosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2, enemy.color);
                                 score += enemy.value;
                                 totalKills++;
                                 
                                 // 显示数学提示
-                                if (showMathTips && score % 50 === 0) {
+                                if (SETTINGS.showMathTips && score % 50 === 0) {
                                     showMathTip(enemy.x, enemy.y, `+${enemy.value} = ${score}`);
                                 }
-                                
-                                // 检查成就
-                                checkAchievements();
                                 
                                 // 有几率掉落道具
                                 if (Math.random() < 0.2) {
@@ -919,20 +950,16 @@
                             break;
                         }
                     }
-                    
-                    // 检查是否飞出屏幕
-                    if (!hit && bullet.y < -20) {
-                        bullets.splice(i, 1);
-                    }
                 }
             }
             
             function updateEnemies() {
+                // 使用倒序遍历以便安全删除
                 for (let i = enemies.length - 1; i >= 0; i--) {
                     const enemy = enemies[i];
                     enemy.y += enemy.speed;
                     enemy.blink += 0.1;
-                    enemy.rotation += 0.02; // 添加旋转动画
+                    enemy.rotation += 0.02;
                     
                     // 检查是否碰到玩家
                     if (!player.invincible &&
@@ -941,16 +968,11 @@
                         enemy.y < player.y + player.height &&
                         enemy.y + enemy.height > player.y) {
                         
-                        createExplosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+                        createExplosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2, enemy.color);
                         
-                        if (easyMode) {
-                            // 简单模式：无敌时间更长
-                            player.invincible = true;
-                            player.invincibleTime = 180; // 3秒无敌
-                        } else {
-                            player.invincible = true;
-                            player.invincibleTime = 120; // 2秒无敌
-                        }
+                        // 无敌时间
+                        player.invincible = true;
+                        player.invincibleTime = SETTINGS.easyMode ? 180 : 120;
                         
                         life--;
                         
@@ -965,13 +987,18 @@
                     }
                     
                     // 检查是否飞出屏幕
-                    if (enemy.y > canvas.height) {
+                    if (enemy.y > canvas.height + 50) {
                         enemies.splice(i, 1);
                     }
                 }
             }
             
+            // ========== 道具管理（优化版） ==========
             function createProp(x, y) {
+                if (props.length >= SETTINGS.maxProps) {
+                    return;
+                }
+                
                 const propTypes = [
                     { type: 'life', color: COLORS.prop1, icon: '❤️', value: '加1条命' },
                     { type: 'fire', color: COLORS.prop2, icon: '🔥', value: '火力升级' },
@@ -988,13 +1015,22 @@
                     color: propType.color,
                     icon: propType.icon,
                     value: propType.value,
-                    rotation: 0
+                    rotation: 0,
+                    collected: false
                 });
             }
             
             function updateProps() {
+                // 使用倒序遍历以便安全删除
                 for (let i = props.length - 1; i >= 0; i--) {
                     const prop = props[i];
+                    
+                    // 如果道具已被收集，跳过
+                    if (prop.collected) {
+                        props.splice(i, 1);
+                        continue;
+                    }
+                    
                     prop.y += prop.speed;
                     prop.rotation += 0.05;
                     
@@ -1005,12 +1041,13 @@
                         prop.y + prop.height > player.y) {
                         
                         collectProp(prop);
+                        prop.collected = true;
                         props.splice(i, 1);
                         continue;
                     }
                     
                     // 检查是否飞出屏幕
-                    if (prop.y > canvas.height) {
+                    if (prop.y > canvas.height + 50) {
                         props.splice(i, 1);
                     }
                 }
@@ -1039,27 +1076,41 @@
                 createExplosion(prop.x + prop.width/2, prop.y + prop.height/2, 50, prop.color);
             }
             
+            // ========== 爆炸效果管理（优化版） ==========
             function createExplosion(x, y, size = 60, color = '#FF9900') {
+                if (explosions.length >= SETTINGS.maxExplosions) {
+                    return;
+                }
+                
                 explosions.push({
                     x: x, y: y,
                     size: size,
                     color: color,
-                    life: 1.0
+                    life: 1.0,
+                    active: true
                 });
             }
             
             function updateExplosions() {
+                // 使用倒序遍历以便安全删除
                 for (let i = explosions.length - 1; i >= 0; i--) {
                     const explosion = explosions[i];
+                    
+                    if (!explosion.active) {
+                        explosions.splice(i, 1);
+                        continue;
+                    }
+                    
                     explosion.life -= 0.05;
                     
                     if (explosion.life <= 0) {
+                        explosion.active = false;
                         explosions.splice(i, 1);
                     }
                 }
             }
             
-            // ========== 玩家移动控制（简化版） ==========
+            // ========== 玩家移动控制 ==========
             function updatePlayerMovement() {
                 // 触摸控制（移动端）
                 if (isMobile && isTouching) {
@@ -1107,75 +1158,17 @@
                 player.engineGlow += 0.1;
                 
                 // 自动射击
-                if (autoShoot) {
+                if (SETTINGS.autoShoot) {
                     if (gameRunning && gameLoopRunning) {
-                        if (Math.random() < 0.25) { // 射击频率
+                        if (Math.random() < SETTINGS.bulletShootRate) {
                             createBullet();
                         }
                     }
                 }
             }
             
-            function checkAchievements() {
-                // 第一次消灭敌人
-                if (totalKills >= 1 && !achievements.firstKill.earned) {
-                    achievements.firstKill.earned = true;
-                    showAchievement(achievements.firstKill);
-                }
-                
-                // 消灭5个敌人
-                if (totalKills >= 5 && !achievements.fiveKills.earned) {
-                    achievements.fiveKills.earned = true;
-                    showAchievement(achievements.fiveKills);
-                }
-                
-                // 通过第一关
-                if (stage >= 2 && !achievements.firstStage.earned) {
-                    achievements.firstStage.earned = true;
-                    showAchievement(achievements.firstStage);
-                }
-                
-                // 消灭10个敌人
-                if (totalKills >= 10 && !achievements.tenKills.earned) {
-                    achievements.tenKills.earned = true;
-                    showAchievement(achievements.tenKills);
-                }
-                
-                // 创造新纪录
-                const historyScore = parseInt(localStorage.getItem('kidHighScore') || '0');
-                if (score > historyScore && !achievements.highScore.earned && score > 100) {
-                    achievements.highScore.earned = true;
-                    showAchievement(achievements.highScore);
-                }
-            }
-            
-            function showAchievement(achievement) {
-                const notification = document.createElement('div');
-                notification.className = 'achievement-notification';
-                notification.innerHTML = `
-                    <div class="achievement-icon">${achievement.icon}</div>
-                    <div class="achievement-title">🏆 获得成就 🏆</div>
-                    <div style="font-size: var(--kid-font-normal); margin-bottom: 10px; color: #fff; text-shadow: 1px 1px 0 #000;">${achievement.title}</div>
-                    <div style="font-size: var(--kid-font-small); color: #fff; text-shadow: 1px 1px 0 #000;">${achievement.message}</div>
-                `;
-                
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    notification.classList.add('show');
-                }, 100);
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                    setTimeout(() => {
-                        if (notification.parentNode) {
-                            notification.parentNode.removeChild(notification);
-                        }
-                    }, 500);
-                }, 3000);
-            }
-            
             function checkStageProgress() {
+                // 当屏幕上的敌人都被消灭且达到一定分数时，进入下一关
                 if (enemies.length === 0 && score >= stage * 100) {
                     stage++;
                     updateUI();
@@ -1187,14 +1180,29 @@
                     life = Math.min(10, life + 1);
                     updateUI();
                     
-                    // 开始下一波敌人
-                    setTimeout(startEnemySpawning, 2000);
+                    // 调整游戏难度
+                    adjustDifficulty();
+                }
+            }
+            
+            // ========== 难度调整 ==========
+            function adjustDifficulty() {
+                // 每5关增加一点难度
+                if (stage % 5 === 0) {
+                    SETTINGS.maxEnemies = Math.min(50, SETTINGS.maxEnemies + 5);
+                    SETTINGS.enemySpawnRate = Math.max(800, SETTINGS.enemySpawnRate - 100);
                 }
             }
             
             function gameOver() {
                 gameRunning = false;
                 gameLoopRunning = false;
+                
+                // 清除敌人生成计时器
+                if (enemySpawnTimer) {
+                    clearInterval(enemySpawnTimer);
+                    enemySpawnTimer = null;
+                }
                 
                 // 保存最高分
                 const historyScore = parseInt(localStorage.getItem('kidHighScore') || '0');
@@ -1214,14 +1222,45 @@
                 
                 // 显示游戏结束信息
                 setTimeout(() => {
-                    alert(`游戏结束！\n\n你的成绩：\n得分：${score}\n击败敌人：${totalKills}\n到达关卡：第${stage}关\n\n点击确定重新开始`);
-                    resetGame();
-                    startGame();
-                    loadHistory();
-                }, 1000);
+                    if (confirm(`游戏结束！\n\n你的成绩：\n得分：${score}\n击败敌人：${totalKills}\n到达关卡：第${stage}关\n\n点击确定重新开始`)) {
+                        cleanupGame();
+                        resetGame();
+                        startGame();
+                        loadHistory();
+                    } else {
+                        cleanupGame();
+                        gameContainer.style.display = 'none';
+                        startScreen.style.display = 'flex';
+                    }
+                }, 500);
             }
             
-            // ========== 绘制玩家飞船（优化版） ==========
+            // ========== 绘制函数 ==========
+            function drawBackground() {
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, '#1a1a3f');
+                gradient.addColorStop(1, '#0a0a23');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制星星
+                stars.forEach(star => {
+                    star.y += star.speed;
+                    if (star.y > canvas.height) {
+                        star.y = 0;
+                        star.x = Math.random() * canvas.width;
+                    }
+                    
+                    ctx.globalAlpha = star.brightness;
+                    ctx.fillStyle = COLORS.stars;
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.globalAlpha = 1;
+            }
+            
+            // 绘制玩家飞船
             function drawPlayer() {
                 ctx.save();
                 
@@ -1334,30 +1373,7 @@
                 ctx.restore();
             }
             
-            // ========== 绘制函数 ==========
-            function drawBackground() {
-                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-                gradient.addColorStop(0, '#1a1a3f');
-                gradient.addColorStop(1, '#0a0a23');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                stars.forEach(star => {
-                    star.y += star.speed;
-                    if (star.y > canvas.height) {
-                        star.y = 0;
-                        star.x = Math.random() * canvas.width;
-                    }
-                    
-                    ctx.globalAlpha = star.brightness;
-                    ctx.fillStyle = COLORS.stars;
-                    ctx.beginPath();
-                    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-                ctx.globalAlpha = 1;
-            }
-            
+            // 绘制敌人
             function drawEnemies() {
                 enemies.forEach(enemy => {
                     ctx.save();
@@ -1558,7 +1574,6 @@
             
             // 辅助函数：变暗颜色
             function darkenColor(color, factor) {
-                // 简单实现：将颜色变暗
                 if (color.startsWith('#')) {
                     let r = parseInt(color.substr(1, 2), 16);
                     let g = parseInt(color.substr(3, 2), 16);
@@ -1575,7 +1590,6 @@
             
             // 辅助函数：变亮颜色
             function lightenColor(color, factor) {
-                // 简单实现：将颜色变亮
                 if (color.startsWith('#')) {
                     let r = parseInt(color.substr(1, 2), 16);
                     let g = parseInt(color.substr(3, 2), 16);
@@ -1590,6 +1604,7 @@
                 return color;
             }
             
+            // 绘制子弹
             function drawBullets() {
                 bullets.forEach(bullet => {
                     ctx.save();
@@ -1622,6 +1637,7 @@
                 });
             }
             
+            // 绘制道具
             function drawProps() {
                 props.forEach(prop => {
                     ctx.save();
@@ -1647,8 +1663,11 @@
                 });
             }
             
+            // 绘制爆炸效果
             function drawExplosions() {
                 explosions.forEach(explosion => {
+                    if (!explosion.active) return;
+                    
                     const radius = explosion.size * explosion.life;
                     const alpha = explosion.life;
                     
@@ -1677,14 +1696,29 @@
                 });
             }
             
-            // ========== 游戏主循环 ==========
-            function gameLoop() {
+            // ========== 游戏主循环（优化版） ==========
+            let lastTime = 0;
+            const fps = 60;
+            const frameInterval = 1000 / fps;
+            
+            function gameLoop(timestamp) {
                 if (!gameLoopRunning) return;
                 
+                // 控制帧率
+                const deltaTime = timestamp - lastTime;
+                if (deltaTime < frameInterval) {
+                    requestAnimationFrame(gameLoop);
+                    return;
+                }
+                lastTime = timestamp - (deltaTime % frameInterval);
+                
+                // 清空画布
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
+                // 绘制背景
                 drawBackground();
                 
+                // 更新游戏状态
                 updatePlayer();
                 updateBullets();
                 updateEnemies();
@@ -1692,18 +1726,21 @@
                 updateExplosions();
                 checkStageProgress();
                 
+                // 绘制游戏对象
                 drawEnemies();
                 drawBullets();
                 drawProps();
                 drawExplosions();
                 drawPlayer();
                 
+                // 继续游戏循环
                 requestAnimationFrame(gameLoop);
             }
             
             // ========== 初始化游戏 ==========
             initGame();
             
+            // 延迟调整画布大小
             setTimeout(() => {
                 if (gameContainer.style.display !== 'none') {
                     resizeCanvas();
