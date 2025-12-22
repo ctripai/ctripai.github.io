@@ -169,75 +169,6 @@
             box-shadow: 0 0 45px rgba(0, 153, 204, 1) !important;
         }
 
-        /* ========== 虚拟摇杆样式 ========== */
-        .virtual-joystick-container {
-            position: absolute;
-            bottom: 120px;
-            left: 60px;
-            width: 160px;
-            height: 160px;
-            z-index: 20;
-            display: none;
-            touch-action: none;
-        }
-
-        .joystick-base {
-            width: 100%;
-            height: 100%;
-            background: rgba(51, 102, 255, 0.3);
-            border: 5px solid #6699ff;
-            border-radius: 50%;
-            position: absolute;
-            box-shadow: 0 0 30px rgba(102, 153, 255, 0.5);
-        }
-
-        .joystick-handle {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(45deg, #3366ff, #6699ff);
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 30px rgba(51, 102, 255, 0.8);
-            border: 3px solid #e6f2ff;
-            transition: transform 0.1s;
-        }
-
-        /* 自动射击区域 */
-        .auto-shoot-area {
-            position: absolute;
-            bottom: 120px;
-            right: 60px;
-            width: 160px;
-            height: 160px;
-            background: rgba(0, 204, 255, 0.3);
-            border: 5px solid #33ccff;
-            border-radius: 50%;
-            z-index: 20;
-            display: none;
-            touch-action: none;
-            box-shadow: 0 0 30px rgba(51, 204, 255, 0.5);
-            transition: background-color 0.2s;
-        }
-
-        .auto-shoot-area.active {
-            background: rgba(0, 204, 255, 0.6);
-            box-shadow: 0 0 40px rgba(51, 204, 255, 0.8);
-        }
-
-        .auto-shoot-area span {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: var(--kid-font-medium);
-            color: #ffffff;
-            text-shadow: 2px 2px 0 #000;
-            font-weight: bold;
-        }
-
         /* ========== 游戏信息栏儿童版 ========== */
         .game-info-kid {
             display: flex;
@@ -275,119 +206,6 @@
             margin-right: 8px;
         }
 
-        /* ========== 家长控制面板 ========== */
-        .parent-controls-panel {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, rgba(20, 30, 60, 0.98), rgba(40, 50, 90, 0.98));
-            border: 5px solid #6699ff;
-            border-radius: 20px;
-            padding: 25px;
-            z-index: 2000;
-            display: none;
-            width: 320px;
-            max-width: 90vw;
-            box-shadow: 0 0 40px rgba(102, 153, 255, 0.7);
-        }
-
-        .parent-controls-panel h3 {
-            color: #6699ff;
-            margin-bottom: 15px;
-            font-size: var(--kid-font-normal);
-            text-align: center;
-            text-shadow: 1px 1px 0 #000;
-        }
-
-        .control-option {
-            margin: 10px 0;
-            padding: 12px;
-            background: rgba(102, 153, 255, 0.15);
-            border-radius: 12px;
-            border: 2px solid #6699ff;
-        }
-
-        .control-option label {
-            color: #e6f2ff;
-            font-size: var(--kid-font-normal);
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-            text-shadow: 1px 1px 0 #000;
-        }
-
-        .control-option input {
-            margin-right: 12px;
-            transform: scale(1.6);
-            accent-color: #6699ff;
-        }
-
-        /* ========== 休息提醒 ========== */
-        .break-reminder {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(45deg, #3366ff, #6699ff);
-            padding: 35px;
-            border-radius: 25px;
-            border: 5px solid #e6f2ff;
-            z-index: 3000;
-            text-align: center;
-            max-width: 400px;
-            width: 90vw;
-            box-shadow: 0 0 50px rgba(102, 153, 255, 0.8);
-            animation: bounce 1s infinite alternate;
-        }
-
-        @keyframes bounce {
-            from { transform: translate(-50%, -50%) scale(1); }
-            to { transform: translate(-50%, -50%) scale(1.05); }
-        }
-
-        /* ========== 成就系统 ========== */
-        .achievement-notification {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.5);
-            background: linear-gradient(45deg, #3366ff, #6699ff);
-            padding: 25px;
-            border-radius: 20px;
-            border: 5px solid #e6f2ff;
-            z-index: 2500;
-            text-align: center;
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 0 40px rgba(102, 153, 255, 0.8);
-            max-width: 350px;
-            width: 90vw;
-        }
-
-        .achievement-notification.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .achievement-icon {
-            font-size: 4rem;
-            margin-bottom: 12px;
-            animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .achievement-title {
-            font-size: var(--kid-font-normal);
-            color: #ffffff;
-            text-shadow: 2px 2px 0 #000;
-            margin-bottom: 12px;
-        }
-
         /* ========== 数学学习提示 ========== */
         .math-tip {
             position: absolute;
@@ -408,33 +226,6 @@
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
             100% { transform: translateY(-100px) scale(0.8); opacity: 0; }
-        }
-
-        /* ========== 分享按钮样式 ========== */
-        .kid-share-btn {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #3366ff, #6699ff);
-            border: 5px solid #e6f2ff;
-            color: white;
-            font-size: var(--kid-font-medium);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 0 30px rgba(102, 153, 255, 0.7);
-            transition: all 0.3s;
-            text-shadow: 1px 1px 0 #000;
-        }
-
-        .kid-share-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 40px rgba(102, 153, 255, 0.9);
         }
 
         /* ========== 游戏画布 ========== */
@@ -517,67 +308,12 @@
                 font-size: var(--kid-font-normal);
             }
             
-            .virtual-joystick-container,
-            .auto-shoot-area {
-                width: 120px;
-                height: 120px;
-                bottom: 90px;
-                left: 25px;
-            }
-            
-            .virtual-joystick-container {
-                left: 25px;
-            }
-            
-            .auto-shoot-area {
-                right: 25px;
-            }
-            
-            .joystick-handle {
-                width: 60px;
-                height: 60px;
-            }
-            
             .big-button {
                 padding: 15px 30px !important;
                 font-size: var(--kid-font-normal) !important;
                 min-height: 60px;
                 min-width: 200px;
                 margin: 8px;
-            }
-            
-            .kid-share-btn {
-                width: 60px;
-                height: 60px;
-                bottom: 20px;
-                right: 20px;
-                font-size: var(--kid-font-normal);
-            }
-            
-            .parent-controls-panel {
-                padding: 20px;
-                width: 280px;
-            }
-            
-            .control-option {
-                padding: 10px;
-                margin: 8px 0;
-            }
-            
-            .control-option label {
-                font-size: var(--kid-font-small);
-            }
-            
-            .control-option input {
-                transform: scale(1.4);
-            }
-            
-            .achievement-notification {
-                padding: 20px;
-            }
-            
-            .achievement-icon {
-                font-size: 3rem;
             }
         }
 
@@ -597,28 +333,11 @@
                 padding: 6px 8px;
             }
             
-            .virtual-joystick-container,
-            .auto-shoot-area {
-                width: 100px;
-                height: 100px;
-                bottom: 80px;
-            }
-            
-            .joystick-handle {
-                width: 50px;
-                height: 50px;
-            }
-            
             .big-button {
                 padding: 12px 25px !important;
                 min-height: 55px;
                 min-width: 180px;
                 margin: 5px;
-            }
-            
-            .kid-share-btn {
-                width: 55px;
-                height: 55px;
             }
         }
 
@@ -668,18 +387,6 @@
             .game-info-kid {
                 margin-top: calc(env(safe-area-inset-top) + 5px);
             }
-            
-            .virtual-joystick-container {
-                bottom: calc(env(safe-area-inset-bottom) + 90px);
-            }
-            
-            .auto-shoot-area {
-                bottom: calc(env(safe-area-inset-bottom) + 90px);
-            }
-            
-            .kid-share-btn {
-                bottom: calc(env(safe-area-inset-bottom) + 20px);
-            }
         }
         
         /* 移动端专用触摸优化 */
@@ -720,56 +427,11 @@
         
         <div style="margin-top: auto; padding: 15px 0; width: 100%; display: flex; flex-direction: column; align-items: center;">
             <button class="big-button" id="mainStartBtn">开始游戏</button>
-            <button class="big-button blue" id="parentSettingsBtn">家长设置</button>
         </div>
     </div>
 
     <!-- 游戏容器 -->
     <div class="game-container" id="gameContainer">
-        <!-- 家长控制面板 -->
-        <div class="parent-controls-panel" id="parentControls">
-            <h3>👪 家长设置</h3>
-            <div class="control-option">
-                <label>
-                    <input type="checkbox" id="autoShootCheck" checked> 自动射击
-                </label>
-            </div>
-            <div class="control-option">
-                <label>
-                    <input type="checkbox" id="easyModeCheck" checked> 简单模式
-                </label>
-            </div>
-            <div class="control-option">
-                <label>
-                    <input type="checkbox" id="joystickCheck" checked> 显示虚拟摇杆
-                </label>
-            </div>
-            <div class="control-option">
-                <label>
-                    <input type="checkbox" id="mathTipsCheck" checked> 显示数学提示
-                </label>
-            </div>
-            <div class="control-option">
-                <label>
-                    <input type="checkbox" id="timeLimitCheck" checked> 游戏时间提醒
-                </label>
-            </div>
-            <div style="text-align: center; margin-top: 20px;">
-                <button class="big-button" onclick="closeParentControls()" style="font-size: var(--kid-font-normal) !important; padding: 12px 30px !important; min-width: 180px;">完成设置</button>
-            </div>
-        </div>
-
-        <!-- 虚拟摇杆 -->
-        <div class="virtual-joystick-container" id="joystickContainer">
-            <div class="joystick-base"></div>
-            <div class="joystick-handle"></div>
-        </div>
-
-        <!-- 自动射击按钮 -->
-        <div class="auto-shoot-area" id="autoShootArea">
-            <span>射击</span>
-        </div>
-
         <!-- 游戏信息栏（儿童版） -->
         <div class="game-info-kid" id="gameInfoKid">
             <div>
@@ -792,9 +454,6 @@
 
         <!-- 游戏画布 -->
         <canvas id="gameCanvas"></canvas>
-
-        <!-- 分享按钮 -->
-        <div class="kid-share-btn" id="shareBtn" title="分享成绩给爸爸妈妈看">📸</div>
     </div>
 
     <script>
@@ -806,12 +465,6 @@
             const startScreen = document.getElementById('startScreen');
             const gameContainer = document.getElementById('gameContainer');
             const mainStartBtn = document.getElementById('mainStartBtn');
-            const parentSettingsBtn = document.getElementById('parentSettingsBtn');
-            const parentControls = document.getElementById('parentControls');
-            const shareBtn = document.getElementById('shareBtn');
-            const joystickContainer = document.getElementById('joystickContainer');
-            const autoShootArea = document.getElementById('autoShootArea');
-            const joystickHandle = document.querySelector('.joystick-handle');
             
             // 检测设备类型
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -825,30 +478,15 @@
             let gameLoopRunning = false;
             let autoShoot = true;  // 默认自动射击
             let easyMode = true;  // 默认简单模式
-            let showJoystick = isMobile;  // 移动端默认显示虚拟摇杆
             let showMathTips = true;  // 默认显示数学提示
-            let enableTimeLimit = true;  // 默认启用时间限制
             
-            // 虚拟摇杆变量
-            let joystickActive = false;
-            let joystickCenterX = 0;
-            let joystickCenterY = 0;
-            let joystickHandleX = 0;
-            let joystickHandleY = 0;
-            let joystickTouchId = null; // 跟踪触摸ID
-            const joystickRadius = 80; // 摇杆半径
-            
-            // 自动射击区域变量
-            let autoShootTouchId = null;
+            // 触摸控制变量
+            let touchX = 0;
+            let touchY = 0;
+            let isTouching = false;
             
             // 键盘控制变量（PC端）
             let keys = {};
-            
-            // 游戏时间限制
-            let playTime = 0;
-            let playTimerInterval = null;
-            const MAX_PLAY_TIME = 20 * 60;  // 20分钟游戏时间限制
-            let breakShown = false;
             
             // 成就系统
             const achievements = {
@@ -918,203 +556,60 @@
                 resizeCanvas();
                 resetGame();
                 startGame();
-                startPlayTimer();
                 loadHistory();
                 
                 // 确保画布获得焦点
                 canvas.focus();
             }
             
-            // ========== 家长控制功能 ==========
-            function initParentControls() {
-                const autoShootCheck = document.getElementById('autoShootCheck');
-                const easyModeCheck = document.getElementById('easyModeCheck');
-                const joystickCheck = document.getElementById('joystickCheck');
-                const mathTipsCheck = document.getElementById('mathTipsCheck');
-                const timeLimitCheck = document.getElementById('timeLimitCheck');
-                
-                // 从本地存储加载设置
-                autoShoot = localStorage.getItem('kidAutoShoot') !== 'false';
-                easyMode = localStorage.getItem('kidEasyMode') !== 'false';
-                showJoystick = localStorage.getItem('kidShowJoystick') !== 'false' && isMobile;
-                showMathTips = localStorage.getItem('kidShowMathTips') !== 'false';
-                enableTimeLimit = localStorage.getItem('kidTimeLimit') !== 'false';
-                
-                // 更新复选框
-                autoShootCheck.checked = autoShoot;
-                easyModeCheck.checked = easyMode;
-                joystickCheck.checked = showJoystick;
-                mathTipsCheck.checked = showMathTips;
-                timeLimitCheck.checked = enableTimeLimit;
-                
-                // 保存设置
-                autoShootCheck.addEventListener('change', function() {
-                    autoShoot = this.checked;
-                    localStorage.setItem('kidAutoShoot', autoShoot);
-                    updateAutoShoot();
-                });
-                
-                easyModeCheck.addEventListener('change', function() {
-                    easyMode = this.checked;
-                    localStorage.setItem('kidEasyMode', easyMode);
-                });
-                
-                joystickCheck.addEventListener('change', function() {
-                    showJoystick = this.checked && isMobile;
-                    localStorage.setItem('kidShowJoystick', showJoystick);
-                    updateJoystickVisibility();
-                });
-                
-                mathTipsCheck.addEventListener('change', function() {
-                    showMathTips = this.checked;
-                    localStorage.setItem('kidShowMathTips', showMathTips);
-                });
-                
-                timeLimitCheck.addEventListener('change', function() {
-                    enableTimeLimit = this.checked;
-                    localStorage.setItem('kidTimeLimit', enableTimeLimit);
-                });
-            }
-            
-            function updateJoystickVisibility() {
-                if (showJoystick && isMobile && gameRunning) {
-                    joystickContainer.style.display = 'block';
-                    autoShootArea.style.display = 'block';
-                    initJoystick();
-                } else {
-                    joystickContainer.style.display = 'none';
-                    autoShootArea.style.display = 'none';
-                }
-            }
-            
-            function updateAutoShoot() {
-                if (!autoShoot) {
-                    autoShootArea.classList.remove('active');
-                }
-            }
-            
-            window.closeParentControls = function() {
-                parentControls.style.display = 'none';
-            };
-            
-            // ========== 虚拟摇杆功能（修复版） ==========
-            function initJoystick() {
+            // ========== 触摸控制功能 ==========
+            function initTouchControls() {
                 if (!isMobile) return;
                 
-                const joystickBase = joystickContainer.querySelector('.joystick-base');
-                
-                // 设置摇杆初始位置
-                const rect = joystickContainer.getBoundingClientRect();
-                joystickCenterX = rect.left + rect.width / 2;
-                joystickCenterY = rect.top + rect.height / 2;
-                joystickHandleX = joystickCenterX;
-                joystickHandleY = joystickCenterY;
-                
-                // 更新摇杆手柄位置
-                updateJoystickVisual();
-                
-                // 触摸事件 - 使用事件委托
-                document.addEventListener('touchstart', handleTouchStart, { passive: false });
-                document.addEventListener('touchmove', handleTouchMove, { passive: false });
-                document.addEventListener('touchend', handleTouchEnd, { passive: false });
-                document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
-                
-                function handleTouchStart(e) {
-                    const touch = e.touches[0];
-                    const touchX = touch.clientX;
-                    const touchY = touch.clientY;
-                    
-                    // 检查是否触摸到摇杆区域
-                    const rect = joystickContainer.getBoundingClientRect();
-                    const distance = Math.sqrt(
-                        Math.pow(touchX - (rect.left + rect.width / 2), 2) +
-                        Math.pow(touchY - (rect.top + rect.height / 2), 2)
-                    );
-                    
-                    if (distance <= rect.width / 2) {
-                        joystickActive = true;
-                        joystickTouchId = touch.identifier;
-                        updateJoystickPosition(touchX, touchY);
-                        e.preventDefault();
-                    }
-                    
-                    // 检查是否触摸到自动射击区域
-                    const autoShootRect = autoShootArea.getBoundingClientRect();
-                    if (touchX >= autoShootRect.left && touchX <= autoShootRect.right &&
-                        touchY >= autoShootRect.top && touchY <= autoShootRect.bottom) {
-                        autoShoot = true;
-                        autoShootArea.classList.add('active');
-                        autoShootTouchId = touch.identifier;
-                        e.preventDefault();
-                    }
-                }
-                
-                function handleTouchMove(e) {
-                    // 处理摇杆触摸
-                    if (joystickActive && joystickTouchId !== null) {
-                        for (let i = 0; i < e.touches.length; i++) {
-                            if (e.touches[i].identifier === joystickTouchId) {
-                                updateJoystickPosition(e.touches[i].clientX, e.touches[i].clientY);
-                                e.preventDefault();
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // 处理自动射击触摸
-                    if (autoShootTouchId !== null) {
-                        autoShoot = true;
-                        autoShootArea.classList.add('active');
-                    }
-                }
-                
-                function handleTouchEnd(e) {
-                    for (let i = 0; i < e.changedTouches.length; i++) {
-                        const touch = e.changedTouches[i];
-                        
-                        // 释放摇杆
-                        if (touch.identifier === joystickTouchId) {
-                            joystickActive = false;
-                            joystickTouchId = null;
-                            joystickHandleX = joystickCenterX;
-                            joystickHandleY = joystickCenterY;
-                            updateJoystickVisual();
-                        }
-                        
-                        // 释放自动射击
-                        if (touch.identifier === autoShootTouchId) {
-                            autoShoot = false;
-                            autoShootTouchId = null;
-                            autoShootArea.classList.remove('active');
-                        }
-                    }
+                // 触摸开始
+                canvas.addEventListener('touchstart', function(e) {
                     e.preventDefault();
-                }
+                    isTouching = true;
+                    
+                    const touch = e.touches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    touchX = touch.clientX - rect.left;
+                    touchY = touch.clientY - rect.top;
+                    
+                    // 直接移动飞船到触摸位置
+                    player.x = touchX - player.width / 2;
+                    player.y = touchY - player.height / 2;
+                });
                 
-                function updateJoystickPosition(touchX, touchY) {
-                    const dx = touchX - joystickCenterX;
-                    const dy = touchY - joystickCenterY;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
+                // 触摸移动
+                canvas.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                    if (!isTouching) return;
                     
-                    if (distance <= joystickRadius) {
-                        joystickHandleX = touchX;
-                        joystickHandleY = touchY;
-                    } else {
-                        const angle = Math.atan2(dy, dx);
-                        joystickHandleX = joystickCenterX + Math.cos(angle) * joystickRadius;
-                        joystickHandleY = joystickCenterY + Math.sin(angle) * joystickRadius;
-                    }
+                    const touch = e.touches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    touchX = touch.clientX - rect.left;
+                    touchY = touch.clientY - rect.top;
                     
-                    updateJoystickVisual();
-                }
+                    // 平滑移动飞船
+                    const targetX = touchX - player.width / 2;
+                    const targetY = touchY - player.height / 2;
+                    
+                    player.x += (targetX - player.x) * 0.3;
+                    player.y += (targetY - player.y) * 0.3;
+                });
                 
-                function updateJoystickVisual() {
-                    const baseRect = joystickContainer.getBoundingClientRect();
-                    const x = joystickHandleX - baseRect.left - 40; // 40是手柄宽度的一半
-                    const y = joystickHandleY - baseRect.top - 40;  // 40是手柄高度的一半
-                    
-                    joystickHandle.style.transform = `translate(${x}px, ${y}px)`;
-                }
+                // 触摸结束
+                canvas.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    isTouching = false;
+                });
+                
+                // 触摸取消
+                canvas.addEventListener('touchcancel', function(e) {
+                    e.preventDefault();
+                    isTouching = false;
+                });
             }
             
             // ========== 键盘控制功能（PC端） ==========
@@ -1128,21 +623,12 @@
                     if (['arrowleft', 'arrowright', 'arrowup', 'arrowdown', ' '].includes(key)) {
                         e.preventDefault();
                     }
-                    
-                    // 空格键控制射击
-                    if (key === ' ') {
-                        autoShoot = true;
-                    }
                 });
                 
                 // 键盘释放事件
                 document.addEventListener('keyup', function(e) {
                     const key = e.key.toLowerCase();
                     keys[key] = false;
-                    
-                    if (key === ' ') {
-                        autoShoot = false;
-                    }
                 });
                 
                 // 防止页面滚动
@@ -1151,125 +637,6 @@
                         e.preventDefault();
                     }
                 }, false);
-            }
-            
-            // ========== 游戏时间限制 ==========
-            function startPlayTimer() {
-                if (!enableTimeLimit) return;
-                
-                if (playTimerInterval) {
-                    clearInterval(playTimerInterval);
-                }
-                
-                playTime = 0;
-                breakShown = false;
-                playTimerInterval = setInterval(function() {
-                    if (!gameRunning) return;
-                    
-                    playTime++;
-                    
-                    // 每10分钟提醒一次
-                    if (playTime === 10 * 60 && !breakShown) {
-                        showBreakReminder("你已经玩了10分钟了！休息一下吧！");
-                        breakShown = true;
-                    }
-                    
-                    // 20分钟强制休息
-                    if (playTime >= MAX_PLAY_TIME) {
-                        showBreakReminder("游戏时间到！让眼睛休息一下吧！", true);
-                        clearInterval(playTimerInterval);
-                        playTimerInterval = null;
-                    }
-                }, 1000);
-            }
-            
-            function showBreakReminder(message, isForceBreak = false) {
-                const reminder = document.createElement('div');
-                reminder.className = 'break-reminder';
-                reminder.innerHTML = `
-                    <div style="color: #fff; text-shadow: 2px 2px 0 #000;">
-                        <div style="font-size: var(--kid-font-medium); margin-bottom: 15px;">⏰ 休息提醒</div>
-                        <div style="font-size: var(--kid-font-normal); margin-bottom: 20px; line-height: 1.5;">${message}</div>
-                        <button onclick="this.parentNode.parentNode.remove()" 
-                                style="padding: 10px 30px; background: #fff; color: #3366ff; 
-                                       border: none; border-radius: 15px; font-size: var(--kid-font-normal);
-                                       font-weight: bold; cursor: pointer;">
-                            知道了
-                        </button>
-                    </div>
-                `;
-                
-                if (isForceBreak) {
-                    const button = reminder.querySelector('button');
-                    button.onclick = function() {
-                        resetGame();
-                        gameContainer.style.display = 'none';
-                        startScreen.style.display = 'flex';
-                        reminder.remove();
-                    };
-                }
-                
-                document.body.appendChild(reminder);
-            }
-            
-            // ========== 成就系统 ==========
-            function checkAchievements() {
-                // 第一次消灭敌人
-                if (totalKills >= 1 && !achievements.firstKill.earned) {
-                    achievements.firstKill.earned = true;
-                    showAchievement(achievements.firstKill);
-                }
-                
-                // 消灭5个敌人
-                if (totalKills >= 5 && !achievements.fiveKills.earned) {
-                    achievements.fiveKills.earned = true;
-                    showAchievement(achievements.fiveKills);
-                }
-                
-                // 通过第一关
-                if (stage >= 2 && !achievements.firstStage.earned) {
-                    achievements.firstStage.earned = true;
-                    showAchievement(achievements.firstStage);
-                }
-                
-                // 消灭10个敌人
-                if (totalKills >= 10 && !achievements.tenKills.earned) {
-                    achievements.tenKills.earned = true;
-                    showAchievement(achievements.tenKills);
-                }
-                
-                // 创造新纪录
-                const historyScore = parseInt(localStorage.getItem('kidHighScore') || '0');
-                if (score > historyScore && !achievements.highScore.earned && score > 100) {
-                    achievements.highScore.earned = true;
-                    showAchievement(achievements.highScore);
-                }
-            }
-            
-            function showAchievement(achievement) {
-                const notification = document.createElement('div');
-                notification.className = 'achievement-notification';
-                notification.innerHTML = `
-                    <div class="achievement-icon">${achievement.icon}</div>
-                    <div class="achievement-title">🏆 获得成就 🏆</div>
-                    <div style="font-size: var(--kid-font-normal); margin-bottom: 10px; color: #fff; text-shadow: 1px 1px 0 #000;">${achievement.title}</div>
-                    <div style="font-size: var(--kid-font-small); color: #fff; text-shadow: 1px 1px 0 #000;">${achievement.message}</div>
-                `;
-                
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    notification.classList.add('show');
-                }, 100);
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                    setTimeout(() => {
-                        if (notification.parentNode) {
-                            notification.parentNode.removeChild(notification);
-                        }
-                    }, 500);
-                }, 3000);
             }
             
             // ========== 数学学习提示 ==========
@@ -1291,45 +658,6 @@
                 }, 2000);
             }
             
-            // ========== 儿童友好的成绩分享 ==========
-            function initShareButton() {
-                shareBtn.addEventListener('click', function() {
-                    const historyScore = parseInt(localStorage.getItem('kidHighScore') || '0');
-                    const isNewRecord = score > historyScore;
-                    
-                    const shareText = `🚀 我今天玩《太空飞机大战》的成绩：\n` +
-                                     `得分：${score} 分\n` +
-                                     `击败了：${totalKills} 个外星敌人\n` +
-                                     `到达了：第 ${stage} 关\n` +
-                                     `${isNewRecord ? '🎉 创造了新纪录！' : '继续加油！'} \n` +
-                                     `#儿童游戏 #太空冒险`;
-                    
-                    if (navigator.share) {
-                        navigator.share({
-                            title: '我的游戏成绩单',
-                            text: shareText,
-                            url: window.location.href
-                        }).catch(err => {
-                            console.log('分享失败:', err);
-                            copyToClipboard(shareText);
-                        });
-                    } else {
-                        copyToClipboard(shareText);
-                    }
-                });
-            }
-            
-            function copyToClipboard(text) {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                
-                alert('成绩已复制！\n\n可以粘贴给爸爸妈妈看哦！\n\n' + text);
-            }
-            
             // ========== 画布适配 ==========
             function resizeCanvas() {
                 const rect = gameContainer.getBoundingClientRect();
@@ -1339,11 +667,6 @@
                 // 设置玩家初始位置
                 player.x = canvas.width / 2 - player.width / 2;
                 player.y = canvas.height - 120;
-                
-                // 更新虚拟摇杆位置
-                if (isMobile && showJoystick) {
-                    updateJoystickVisibility();
-                }
                 
                 // 生成星星背景
                 createStars();
@@ -1370,24 +693,11 @@
                 // 修复开始按钮
                 setupStartButton();
                 
-                // 初始化家长控制
-                initParentControls();
-                
-                // 初始化虚拟摇杆
-                if (isMobile) {
-                    // 初始化会在游戏开始时调用
-                }
+                // 初始化触摸控制
+                initTouchControls();
                 
                 // 初始化键盘控制（PC端）
                 initKeyboardControls();
-                
-                // 初始化分享按钮
-                initShareButton();
-                
-                // 设置事件监听器
-                parentSettingsBtn.addEventListener('click', function() {
-                    parentControls.style.display = 'block';
-                });
                 
                 // 窗口大小变化时重新调整画布
                 window.addEventListener('resize', resizeCanvas);
@@ -1409,9 +719,6 @@
             function startGame() {
                 gameRunning = true;
                 gameLoopRunning = true;
-                
-                // 显示虚拟摇杆
-                updateJoystickVisibility();
                 
                 // 开始游戏循环
                 gameLoop();
@@ -1748,20 +1055,11 @@
                 }
             }
             
-            // ========== 玩家移动控制（修复版） ==========
+            // ========== 玩家移动控制（简化版） ==========
             function updatePlayerMovement() {
-                // 虚拟摇杆控制（移动端）
-                if (joystickActive && gameRunning) {
-                    const dx = joystickHandleX - joystickCenterX;
-                    const dy = joystickHandleY - joystickCenterY;
-                    
-                    // 计算移动方向
-                    const moveX = dx / joystickRadius;
-                    const moveY = dy / joystickRadius;
-                    
-                    // 更新玩家位置
-                    player.x += moveX * player.speed;
-                    player.y += moveY * player.speed;
+                // 触摸控制（移动端）
+                if (isMobile && isTouching) {
+                    // 已经在触摸事件中更新了位置
                 }
                 
                 // 键盘控制（PC端）
@@ -1812,6 +1110,65 @@
                         }
                     }
                 }
+            }
+            
+            function checkAchievements() {
+                // 第一次消灭敌人
+                if (totalKills >= 1 && !achievements.firstKill.earned) {
+                    achievements.firstKill.earned = true;
+                    showAchievement(achievements.firstKill);
+                }
+                
+                // 消灭5个敌人
+                if (totalKills >= 5 && !achievements.fiveKills.earned) {
+                    achievements.fiveKills.earned = true;
+                    showAchievement(achievements.fiveKills);
+                }
+                
+                // 通过第一关
+                if (stage >= 2 && !achievements.firstStage.earned) {
+                    achievements.firstStage.earned = true;
+                    showAchievement(achievements.firstStage);
+                }
+                
+                // 消灭10个敌人
+                if (totalKills >= 10 && !achievements.tenKills.earned) {
+                    achievements.tenKills.earned = true;
+                    showAchievement(achievements.tenKills);
+                }
+                
+                // 创造新纪录
+                const historyScore = parseInt(localStorage.getItem('kidHighScore') || '0');
+                if (score > historyScore && !achievements.highScore.earned && score > 100) {
+                    achievements.highScore.earned = true;
+                    showAchievement(achievements.highScore);
+                }
+            }
+            
+            function showAchievement(achievement) {
+                const notification = document.createElement('div');
+                notification.className = 'achievement-notification';
+                notification.innerHTML = `
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-title">🏆 获得成就 🏆</div>
+                    <div style="font-size: var(--kid-font-normal); margin-bottom: 10px; color: #fff; text-shadow: 1px 1px 0 #000;">${achievement.title}</div>
+                    <div style="font-size: var(--kid-font-small); color: #fff; text-shadow: 1px 1px 0 #000;">${achievement.message}</div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 100);
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 500);
+                }, 3000);
             }
             
             function checkStageProgress() {
