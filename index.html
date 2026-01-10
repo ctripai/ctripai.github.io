@@ -1,782 +1,1075 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>熊志文的作品集</title>
-  <style>
-    /* 全局重置与基础样式 */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+
+    <title>TripAI - 智能旅行规划师</title>
+<!-- 在<head>标签内，<title>标签之后添加 -->
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIHJ4PSIyMCIgZmlsbD0idXJsKCNncmFkaWVudCkiLz48cGF0aCBkPSJNMzAgNDAgTDUwIDYwIEw3MCA0MCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNNTAgMjUgTDY1IDQwIEwzNSA0MCBaIiBmaWxsPSJ3aGl0ZSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNzUiIHI9IjYiIGZpbGw9IiMwMEZGQ0MiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50IiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojNjY3RUVBO3N0b3Atb3BhY2l0eToxIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojNzY0QkEyO3N0b3Atb3BhY2l0eToxIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PC9zdmc+" type="image/svg+xml">
+
+<!-- 添加Apple设备支持 -->
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIHJ4PSIyMCIgZmlsbD0iIzY2N0VFQSIvPjxwYXRoIGQ9Ik0zMCA0MCBMNTAgNjAgTDcwIDQwIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik01MCAyNSBMNjUgNDAgTDM1IDQwIFoiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iNTAiIGN5PSI3NSIgcj0iNiIgZmlsbD0iIzAwRkZDQyIvPjwvc3ZnPg==">
+
+    <meta name="description" content="TripAI智能旅行规划师，根据您的偏好和预算为您设计个性化旅行路线">
+    <meta name="keywords" content="旅行规划,AI旅游,智能行程,自驾游,说走就走">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 关键CSS内联，确保首屏渲染速度 -->
+    <style>
+        /* ==================== CSS 变量系统 ==================== */
+        :root {
+            --color-primary: #667eea;
+            --color-secondary: #764ba2;
+            --color-accent: #00b4d8;
+            --color-dark: #0a192f;
+            --color-dark-mid: #1a3a5f;
+            --color-dark-light: #2c5282;
+            --color-white: #ffffff;
+            --color-text-primary: #333333;
+            --color-text-light: rgba(255, 255, 255, 0.9);
+            --color-text-lighter: rgba(255, 255, 255, 0.7);
+            --color-text-lightest: rgba(255, 255, 255, 0.5);
+            
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-primary-accent: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #00b4d8 100%);
+            --gradient-text: linear-gradient(135deg, #ffffff 0%, #a8edea 50%, #667eea 100%);
+            
+            --z-loading: 1000;
+            --z-navbar: 100;
+            --z-content: 10;
+            
+            --transition-base: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: var(--color-dark);
+            color: var(--color-text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* 主容器 - 初始状态只有渐变背景 */
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--color-white);
+            padding: 0 20px;
+            position: relative;
+            background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-dark-mid) 50%, var(--color-dark) 100%);
+            transition: background-image 1.5s ease-in-out;
+        }
+
+        /* 加载完成后的背景图片样式 */
+        .main-container.bg-loaded {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%), 
+                        var(--bg-image-url) no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* 背景加载进度指示器 */
+        .bg-loading-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--gradient-primary);
+            z-index: var(--z-loading);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        /* 背景加载完成后的淡入效果 */
+        @keyframes bgFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .bg-fade-in {
+            animation: bgFadeIn 1.2s ease-out forwards;
+        }
+
+        /* 内容区域 - 初始状态隐藏 */
+        .navbar, .content-area {
+            position: relative;
+            z-index: var(--z-navbar);
+            opacity: 0; /* 初始隐藏 */
+            transition: opacity 0.5s ease;
+        }
+
+        /* 内容区域显示后的样式 */
+        .navbar.visible, .content-area.visible {
+            opacity: 1;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+       .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-white);
+    text-decoration: none;
+    transition: var(--transition-base);
+}
+
+.logo:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.logo:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+/* Logo图标容器 */
+.logo-icon {
+    position: relative;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-primary-accent);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.logo-icon i {
+    font-size: 1.5rem;
+    color: var(--color-white);
+}
+
+/* Logo文字样式 */
+.logo-text {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    letter-spacing: 1px;
+    position: relative;
+}
+
+.logo-text::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--gradient-primary-accent);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.logo:hover .logo-text::after {
+    transform: scaleX(1);
+}
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-item {
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition-base);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: inherit;
+            color: white;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .nav-item:focus {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-family: inherit;
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        .avatar:focus {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .main-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            color: var(--color-text-light);
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        .input-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .input-container:focus-within {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-field {
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+            color: #333;
+            flex-grow: 1;
+            padding: 10px;
+            background: transparent;
+            min-height: 40px;
+        }
+
+        .input-field::placeholder {
+            color: #999;
+        }
+
+        .input-buttons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 1.4rem;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .icon-btn:hover {
+            color: #007bff;
+            background: rgba(0, 123, 255, 0.1);
+        }
+
+        .submit-btn {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-base);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            font-family: inherit;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .submit-btn:focus {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .action-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            max-width: 800px;
+        }
+
+      .action-button {
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* 添加以下属性防止文本换行 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+        .action-button:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .help-text {
+            margin-top: 60px;
+            font-size: 1rem;
+            color: var(--color-text-lighter);
+            position: relative;
+            animation: bounce 2s infinite;
+        }   
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* 内容淡入动画 - 仅在背景加载完成后触发 */
+        @keyframes contentFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 初始状态：内容区域所有子元素隐藏 */
+        .content-area > * {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* 当内容区域可见时，触发子元素动画 */
+        .content-area.visible > * {
+            animation: contentFadeIn 0.8s ease-out forwards;
+        }
+
+        /* 为每个子元素设置动画延迟 */
+        .content-area.visible > *:nth-child(1) { animation-delay: 0.2s; }
+        .content-area.visible > *:nth-child(2) { animation-delay: 0.4s; }
+        .content-area.visible > *:nth-child(3) { animation-delay: 0.6s; }
+        .content-area.visible > *:nth-child(4) { animation-delay: 0.8s; }
+        .content-area.visible > *:nth-child(5) { animation-delay: 1.0s; }
+
+        /* 响应式设计优化 */
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+                padding: 0 10px;
+            }
+
+            .input-container {
+                flex-direction: column;
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .input-field {
+                width: 100%;
+                text-align: center;
+            }
+
+            .input-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+         .action-buttons {
+        flex-direction: row; /* 保持水平排列而不是垂直 */
+        flex-wrap: wrap; /* 允许换行 */
+        justify-content: center;
+        gap: 12px; /* 减小间距 */
     }
 
-    body {
-      line-height: 1.6;
-      color: #1a202c;
-      background-color: #f8f9fa;
-      scroll-behavior: smooth;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
-    }
-
-    /* 炫酷标题样式 - 渐变文字+立体效果+动效 */
-    .section-title {
-      position: relative;
-      font-size: 3rem;
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 3rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-    }
-
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80px;
-      height: 4px;
-      background: linear-gradient(135deg, #667eea, #f093fb);
-      border-radius: 2px;
-      animation: stretch 2s infinite alternate;
-    }
-
-    @keyframes stretch {
-      from { width: 80px; }
-      to { width: 120px; }
-    }
-
-    /* 首页英雄区标题优化样式 - 核心调整部分 */
-    .hero-content h1 {
-      font-size: clamp(2.5rem, 6vw, 3.8rem); /* 响应式字体，兼顾多设备 */
-      font-weight: 800; /* 降低字重，避免过于厚重 */
-      margin-bottom: 1.5rem; /* 增加底部间距，呼吸感更强 */
-      position: relative;
-      animation: fadeInUp 1s ease;
-      /* 更柔和的渐变，与背景融合 */
-      background: linear-gradient(90deg, #ffffff 0%, #f0f4ff 50%, #ffffff 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      background-size: 150% auto; /* 渐变移动速度放缓 */
-      animation: textGradient 6s linear infinite, fadeInUp 1s ease;
-      /* 多层阴影，增强立体感但不刺眼 */
-      text-shadow: 
-        0 1px 2px rgba(0, 0, 0, 0.1),
-        0 3px 6px rgba(102, 126, 234, 0.2);
-    }
-
-    @keyframes textGradient {
-      to {
-        background-position: 150% center;
-      }
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* 标题下划线优化 */
-    .hero-content h1::after {
-      content: '';
-      position: absolute;
-      bottom: -8px; /* 调整下划线位置 */
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100px; /* 缩短下划线，更精致 */
-      height: 2px; /* 减薄下划线 */
-      background: linear-gradient(90deg, #ffffff, #667eea, #ffffff);
-      border-radius: 1px;
-      /* 下划线呼吸动画，更柔和 */
-      animation: linePulse 3s ease-in-out infinite alternate;
-    }
-
-    @keyframes linePulse {
-      from { width: 80px; opacity: 0.7; }
-      to { width: 120px; opacity: 1; }
-    }
-
-    /* 导航栏样式 */
-    .navbar {
-      background-color: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 70px;
-    }
-
-    .nav-logo {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #667eea;
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-
-    .nav-logo:hover {
-      color: #764ba2;
-    }
-
-    .nav-menu {
-      display: flex;
-      list-style: none;
-      gap: 2rem;
-    }
-
-    .nav-link {
-      color: #4a5568;
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: #667eea;
-      transition: width 0.3s ease;
-    }
-
-    .nav-link:hover {
-      color: #667eea;
-    }
-
-    .nav-link:hover::after {
-      width: 100%;
-    }
-
-    .nav-toggle {
-      display: none;
-      cursor: pointer;
-    }
-
-    .bar {
-      display: block;
-      width: 25px;
-      height: 3px;
-      margin: 5px auto;
-      background-color: #4a5568;
-      transition: all 0.3s ease;
-    }
-
-    /* 英雄区样式 - 粒子+沉浸式背景融合（方案3核心） */
-    .hero {
-      height: 90vh;
-      /* 沉浸式背景图+渐变蒙版（方案3的核心设计） */
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.7) 0%, rgba(118, 75, 162, 0.7) 100%), url('https://picsum.photos/id/1/1920/1080') center/cover no-repeat fixed;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* 粒子画布容器 - 叠加在背景之上 */
-    #particles-js {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      /* 粒子层半透明，不遮挡背景细节 */
-      opacity: 0.8;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
-      padding: 3rem;
-      border-radius: 20px;
-      /* 毛玻璃效果增强沉浸感 */
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .hero-content p {
-      font-size: clamp(1.2rem, 3vw, 1.6rem); /* 响应式副标题 */
-      color: white;
-      margin-bottom: 2rem;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      animation: fadeInUp 1s ease 0.3s both;
-      line-height: 1.8;
-      font-weight: 400; /* 降低副标题字重，突出主标题 */
-    }
-
-    .hero-content .tags {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 2rem;
-      animation: fadeInUp 1s ease 0.5s both;
-    }
-
-    .hero-content .tag {
-      padding: 0.5rem 1.2rem;
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
-      border-radius: 50px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      backdrop-filter: blur(5px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      transition: all 0.3s ease;
-    }
-
-    .hero-content .tag:hover {
-      background: rgba(255, 255, 255, 0.25);
-      transform: scale(1.05);
-    }
-
-    .cta-btn {
-      padding: 1rem 2.5rem;
-      background: white;
-      color: #667eea;
-      border: none;
-      border-radius: 50px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      animation: fadeInUp 1s ease 0.6s both;
-    }
-
-    .cta-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-      background: #f8f9fa;
-    }
-
-    /* 关于我部分 */
-    .about {
-      padding: 8rem 0;
-      background-color: white;
-    }
-
-    .about-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: center;
-    }
-
-    .about-text {
-      font-size: 1.1rem;
-      color: #4a5568;
-      line-height: 1.8;
-    }
-
-    .about-text p {
-      margin-bottom: 1.5rem;
-    }
-
-    .about-text .highlight {
-      color: #667eea;
-      font-weight: 600;
-    }
-
-    .about-image img {
-      width: 100%;
-      max-width: 300px;
-      border-radius: 50%;
-      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-      margin: 0 auto;
-      display: block;
-    }
-
-    /* 作品展示部分 */
-    .projects {
-      padding: 8rem 0;
-      background: linear-gradient(135deg, #f5f7fa 0%, #e4eaf5 100%);
-    }
-
-    .project-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2.5rem;
-    }
-
-    .project-card {
-      background-color: white;
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-    }
-
-    .project-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.12);
-    }
-
-    .project-card img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-    }
-
-    .project-card h3 {
-      padding: 1.5rem 1.5rem 0.5rem;
-      font-size: 1.3rem;
-      color: #2d3748;
-    }
-
-    .project-card p {
-      padding: 0 1.5rem 1.5rem;
-      color: #718096;
-    }
-
-    /* 联系部分 */
-    .contact {
-      padding: 8rem 0;
-      background-color: white;
-    }
-
-    .contact-form {
-      max-width: 600px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .contact-form input,
-    .contact-form textarea {
-      padding: 1rem;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.3s ease;
-    }
-
-    .contact-form input:focus,
-    .contact-form textarea:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .contact-form button {
-      padding: 1rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .contact-form button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-    }
-
-    /* 页脚样式 */
-    .footer {
-      background-color: #2d3748;
-      color: white;
-      text-align: center;
-      padding: 2rem;
-    }
-
-    /* 懒加载过渡动画 - 模糊到清晰效果 */
-    .fade-in {
-      opacity: 0;
-      filter: blur(10px);
-      transition: opacity 0.8s ease-in-out, filter 0.8s ease-in-out;
-      width: 100%;
-      height: 100%;
-    }
-
-    .fade-in.loaded {
-      opacity: 1;
-      filter: blur(0);
-    }
-
-    /* LQIP 占位图样式 */
-    .lqip-placeholder {
-      background-size: cover;
-      background-position: center;
-      display: block;
-    }
-
-    /* 响应式样式 */
-    @media (max-width: 768px) {
-      .nav-menu {
-        position: fixed;
-        top: 70px;
-        left: -100%;
-        flex-direction: column;
-        background-color: white;
-        width: 100%;
-        height: calc(100vh - 70px);
-        padding: 2rem;
-        transition: 0.3s;
-        box-shadow: 0 5px 10px rgba(0,0,0,0.05);
-      }
-
-      .nav-menu.active {
-        left: 0;
-      }
-
-      .nav-toggle {
-        display: block;
-      }
-
-      .nav-toggle.active .bar:nth-child(2) {
-        opacity: 0;
-      }
-
-      .nav-toggle.active .bar:nth-child(1) {
-        transform: translateY(8px) rotate(45deg);
-      }
-
-      .nav-toggle.active .bar:nth-child(3) {
-        transform: translateY(-8px) rotate(-45deg);
-      }
-
-      .hero-content {
-        padding: 2rem;
-      }
-
-      .section-title {
-        font-size: 2.5rem;
-      }
-
-      .about-content {
-        grid-template-columns: 1fr;
+    .action-button {
+        padding: 12px 18px; /* 减小内边距 */
+        font-size: 0.85rem; /* 减小字体大小 */
+        min-width: 120px; /* 设置最小宽度 */
+        max-width: 160px; /* 设置最大宽度 */
+        justify-content: center;
         text-align: center;
-      }
-
-      /* 移动端粒子效果优化，降低粒子数量提升性能 */
-      #particles-js {
-        opacity: 0.6;
-      }
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-  </style>
-  <!-- 预加载首屏关键图（头像和背景图） -->
-  <link rel="preload" as="image" href="https://picsum.photos/id/1005/300/300" fetchpriority="high">
-  <link rel="preload" as="image" href="https://picsum.photos/id/1/1920/1080" fetchpriority="high">
-  <!-- 引入粒子JS库 -->
-  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+            .navbar {
+                padding: 15px 0;
+            }
+
+           .logo {
+        font-size: 1.5rem;
+    }
+    
+    .logo-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .logo-icon i {
+        font-size: 1.2rem;
+    }
+            .nav-item {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            .avatar {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-title {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .content-area {
+                padding: 20px 10px;
+            }
+
+            .input-container {
+                padding: 15px;
+            }
+
+            .submit-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+           .action-buttons {
+        gap: 10px; /* 进一步减小间距 */
+    }
+    
+    .action-button {
+        padding: 10px 14px;
+        font-size: 0.8rem; /* 进一步减小字体大小 */
+        min-width: 110px;
+        max-width: 140px;
+    }
+        }
+
+/* 优化按钮内容布局 */
+.action-button span {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+        /* 加载骨架屏 */
+        .loading-skeleton {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.05) 25%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            z-index: 1;
+        }
+
+        @keyframes skeleton-loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* 页脚样式 */
+.site-footer {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 30px 20px;
+    margin-top: 40px;
+    opacity: 0; /* 初始隐藏 */
+    transition: opacity 0.5s ease;
+}
+
+/* 页脚显示样式 */
+.site-footer.visible {
+    opacity: 1;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 25px;
+    margin-bottom: 20px;
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.footer-link:hover {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.footer-link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transition: width 0.3s ease;
+}
+
+.footer-link:hover::after {
+    width: 100%;
+}
+
+.footer-copyright {
+    margin-bottom: 20px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.footer-note {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.footer-social {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.social-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: white;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.social-icon:hover {
+    background: rgba(102, 126, 234, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .site-footer {
+        padding: 25px 15px;
+        margin-top: 30px;
+    }
+    
+    .footer-links {
+        gap: 20px;
+    }
+    
+    .footer-link {
+        font-size: 0.85rem;
+    }
+    
+    .footer-copyright {
+        font-size: 0.8rem;
+    }
+    
+    .footer-note {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-footer {
+        padding: 20px 10px;
+    }
+    
+    .footer-links {
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .footer-link {
+        font-size: 0.8rem;
+    }
+    
+    .footer-social {
+        gap: 12px;
+        margin-top: 20px;
+    }
+    
+    .social-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+}
+    </style>
 </head>
 <body>
-
-  <!-- 导航栏 -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="#" class="nav-logo">Zhiwen's Portfolio</a>
-      <div class="nav-toggle" id="mobile-menu">
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-      </div>
-      <ul class="nav-menu">
-        <li class="nav-item"><a href="#home" class="nav-link">首页</a></li>
-        <li class="nav-item"><a href="#about" class="nav-link">关于我</a></li>
-        <li class="nav-item"><a href="#projects" class="nav-link">作品</a></li>
-        <li class="nav-item"><a href="#contact" class="nav-link">联系</a></li>
-      </ul>
-    </div>
-  </nav>
-
-  <!-- 首页横幅 - 粒子+沉浸式背景融合（方案3核心） -->
-  <section id="home" class="hero">
-    <div id="particles-js"></div> <!-- 粒子画布 -->
-    <div class="hero-content">
-      <h1>你好，我是熊志文</h1>
-      <p>资深软件工程师 & 全栈技术架构师</p>
-      <div class="tags">
-       <span class="tag">微服务架构</span>
-        <span class="tag">云原生</span>
-        <span class="tag">大数据</span>
-        <span class="tag">全栈开发</span>      
-      </div>
-      <button class="cta-btn">查看作品</button>
-    </div>
-  </section>
-
-  <!-- 关于我 -->
-  <section id="about" class="about">
-    <div class="container">
-      <h2 class="section-title">关于我</h2>
-      <div class="about-content">
-        <div class="about-text">
-          <p>我是一名拥有<span class="highlight">13年+</span>一线开发与架构设计经验的资深软件工程师，专注于企业级应用研发、分布式系统构建与技术团队管理，曾服务于互联网、金融、智能制造等多个行业的头部企业。</p>
-          <p>擅长从0到1搭建高可用、高并发的技术体系，主导过多个千万级用户产品的架构设计与落地，注重技术与业务的深度融合，始终以解决实际业务问题为核心目标。</p>
-          <p><strong>核心技术栈：</strong>Java/Go/Python、微服务架构、云原生技术（K8s/Docker）、前端全栈（React/Vue）、大数据与中间件（Redis/MQ/Elasticsearch）</p>
-          <p>除了技术研发，我也热衷于技术分享与团队培养，坚信优秀的技术产品离不开高效的团队协作与持续的技术创新。</p>
-        </div>
-        <div class="about-image">
-          <!-- 支持JS时使用LQIP和自定义懒加载 -->
-          <img 
-            class="fade-in lqip-placeholder"
-            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22 viewBox=%220 0 300 300%22%3E%3Crect width=%22300%22 height=%22300%22 fill=%22%23e0e7ff%22/%3E%3Ccircle cx=%22150%22 cy=%22150%22 r=%22120%22 fill=%22%23c7d2fe%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E头像%3C/text%3E%3C/svg%3E')"
-            data-src="https://picsum.photos/id/1005/300/300" 
-            alt="熊志文个人头像"
-          >
-          <!-- 不支持JS时使用原生懒加载 -->
-          <noscript>
-            <img 
-              src="https://picsum.photos/id/1005/300/300" 
-              alt="熊志文个人头像"
-              loading="lazy"
-              style="width:100%;max-width:300px;border-radius:50%;box-shadow:0 10px 30px rgba(102, 126, 234, 0.2);"
-            >
-          </noscript>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 作品展示 -->
-  <section id="projects" class="projects">
-    <div class="container">
-      <h2 class="section-title">我的作品</h2>
-      <div class="project-grid">
-        <div class="project-card">
-          <!-- 支持JS时使用LQIP和自定义懒加载 -->
-          <img 
-            class="fade-in lqip-placeholder"
-            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22 viewBox=%220 0 400 250%22%3E%3Crect width=%22400%22 height=%22250%22 fill=%22%23f0f4ff%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E微服务平台%3C/text%3E%3C/svg%3E')"
-            data-src="https://picsum.photos/id/1/400/250" 
-            alt="企业级微服务平台"
-          >
-          <!-- 不支持JS时使用原生懒加载 -->
-          <noscript>
-            <img 
-              src="https://picsum.photos/id/1/400/250" 
-              alt="企业级微服务平台"
-              loading="lazy"
-              style="width:100%;height:200px;object-fit:cover;"
-            >
-          </noscript>
-          <h3>企业级微服务平台</h3>
-          <p>基于Spring Cloud Alibaba构建的分布式微服务架构，支撑日均千万级请求，已在3家大型企业落地。</p>
-        </div>
-        <div class="project-card">
-          <img 
-            class="fade-in lqip-placeholder"
-            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22 viewBox=%220 0 400 250%22%3E%3Crect width=%22400%22 height=%22250%22 fill=%22%23eef3ff%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E大数据分析系统%3C/text%3E%3C/svg%3E')"
-            data-src="https://picsum.photos/id/29/400/250" 
-            alt="大数据分析平台"
-          >
-          <noscript>
-            <img 
-              src="https://picsum.photos/id/29/400/250" 
-              alt="大数据分析平台"
-              loading="lazy"
-              style="width:100%;height:200px;object-fit:cover;"
-            >
-          </noscript>
-          <h3>大数据分析平台</h3>
-          <p>基于Flink+Spark构建的实时数据处理系统，为金融行业提供实时风控与用户行为分析能力。</p>
-        </div>
-        <div class="project-card">
-          <img 
-            class="fade-in lqip-placeholder"
-            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22 viewBox=%220 0 400 250%22%3E%3Crect width=%22400%22 height=%22250%22 fill=%22%23e6eeff%22/%3E%3Ctext x=%2250%%22 y=%2250%%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22 fill=%22%234a6baf%22%3E云原生管理系统%3C/text%3E%3C/svg%3E')"
-            data-src="https://picsum.photos/id/237/400/250" 
-            alt="云原生管理系统"
-          >
-          <noscript>
-            <img 
-              src="https://picsum.photos/id/237/400/250" 
-              alt="云原生管理系统"
-              loading="lazy"
-              style="width:100%;height:200px;object-fit:cover;"
-            >
-          </noscript>
-          <h3>云原生管理系统</h3>
-          <p>基于Kubernetes的容器编排与资源管理平台，简化企业云原生转型流程，支持多集群统一管理。</p>
-        </div>
-      </div>
-    </div>
-  </section>
-  
-  <!-- 联系方式 -->
-  <section id="contact" class="contact">
-    <div class="container">
-        <h2>娱乐一下</h2>
-        <p><a href="space-plane-game.html" style="color: #53d8fb; text-decoration: none; font-weight: bold;">H5飞机大战小游戏</a></p>
-        <p><a href="math-game.html" style="color: #53d8fb; text-decoration: none; font-weight: bold;">数学口算大闯关</a></p>
-    </div>
+    <!-- 背景图片加载进度指示器 -->
+    <div class="bg-loading-indicator" id="bgLoadingIndicator"></div>
     
-    <div class="container">
-      <h2 class="section-title">联系我</h2>
-      <form class="contact-form">
-        <input type="text" placeholder="你的名字" required />
-        <input type="email" placeholder="你的邮箱" required />
-        <textarea placeholder="消息内容" rows="5" required></textarea>
-        <button type="submit">发送消息</button>
-      </form>
+    <!-- 骨架屏 -->
+    <div class="loading-skeleton" id="loadingSkeleton"></div>
+    
+    <div class="main-container" id="mainContainer">
+        <header class="navbar" id="navbar">
+            
+<a href="/" class="logo" aria-label="TripAI 首页">
+    <span class="logo-icon" aria-hidden="true">
+        <i class="fas fa-route"></i>
+        <i class="fas fa-brain" style="font-size: 0.7em; position: relative; left: -8px; top: 2px;"></i>
+    </span>
+    <span class="logo-text">TripAI</span>
+</a>
+            <div class="nav-right">
+                <button class="nav-item" title="切换货币" aria-label="切换货币" data-toggle="currency">$</button>
+                <button class="nav-item" title="切换温度单位" aria-label="切换温度单位" data-toggle="temperature">°F</button>
+                <button class="avatar" title="用户头像" aria-label="用户菜单" aria-haspopup="menu">熊</button>
+            </div>
+        </header>
+
+        <main class="content-area" id="contentArea">
+            <h1 class="main-title">嘿 熊志文, 我们今天去哪儿?</h1>
+            <p class="subtitle">告诉我你的风格和预算，我会为你设计一个独一无二的旅行体验</p>
+
+            <div class="input-container">
+                <input type="text" class="input-field" placeholder="例如：一个周末去东京的米其林美食之旅，预算5000元" id="travelInput">
+                <div class="input-buttons">
+                    <button class="icon-btn" title="添加附件">📎</button>
+                    <button class="icon-btn" title="语音输入">🎙️</button>
+                    <button class="submit-btn" id="planBtn">
+                        ✈️ 计划我的旅行
+                    </button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-button"> 创建一个新旅行</button>
+                <button class="action-button">启发我去哪里</button>
+                <button class="action-button">规划自驾游</button>
+                <button class="action-button">规划一次说走就走的旅行</button>
+            </div>
+
+            <p class="help-text">看看我怎么能帮你 ↓</p>
+        </main>
+
+        <!-- 在内容区域之后，main-container闭合之前添加页脚 -->
+<footer class="site-footer" id="siteFooter">
+    <div class="footer-content">
+        <div class="footer-links">
+            <a href="#" class="footer-link">关于我们</a>
+            <a href="#" class="footer-link">联系我们</a>
+            <a href="#" class="footer-link">隐私政策</a>
+            <a href="#" class="footer-link">使用条款</a>
+            <a href="#" class="footer-link">帮助中心</a>
+        </div>
+        <div class="footer-copyright">
+            <p>© 2024 TripAI - 智能旅行规划师. 保留所有权利.</p>
+            <p class="footer-note">AI旅行规划，让每次出行都成为美好回忆</p>
+        </div>
+        <div class="footer-social">
+            <span class="social-text">关注我们:</span>
+            <a href="#" class="social-icon" title="微信">📱</a>
+            <a href="#" class="social-icon" title="微博">📰</a>
+            <a href="#" class="social-icon" title="抖音">🎵</a>
+        </div>
     </div>
-  </section>
+</footer>
 
-  <!-- 页脚 -->
-  <footer class="footer">
-    <p>&copy; 2025 熊志文的个人作品集. 版权所有.</p>
-  </footer>
+    </div>
 
-  <script>
-    // 粒子配置 - 适配沉浸式背景，调整颜色和透明度
-    particlesJS("particles-js", {
-      "particles": {
-        "number": {
-          "value": 60, // 减少粒子数量，避免遮挡背景
-          "density": {
-            "enable": true,
-            "value_area": 800
-          }
-        },
-        "color": {
-          "value": "#ffffff" // 白色粒子与渐变背景形成对比
-        },
-        "shape": {
-          "type": "circle"
-        },
-        "opacity": {
-          "value": 0.7,
-          "random": true
-        },
-        "size": {
-          "value": 2,
-          "random": true
-        },
-        "line_linked": {
-          "enable": true,
-          "distance": 150,
-          "color": "#ffffff", // 白色连线增强科技感
-          "opacity": 0.3,
-          "width": 1
-        },
-        "move": {
-          "enable": true,
-          "speed": 1,
-          "direction": "none",
-          "random": true,
-          "straight": false,
-          "out_mode": "out",
-          "attract": {
-            "enable": false
-          }
-        }
-      },
-      "interactivity": {
-        "detect_on": "canvas",
-        "events": {
-          "onhover": {
-            "enable": true,
-            "mode": "grab"
-          },
-          "onclick": {
-            "enable": true,
-            "mode": "push"
-          },
-          "resize": true
-        },
-        "modes": {
-          "grab": {
-            "distance": 140,
-            "line_linked": {
-              "opacity": 0.5
-            }
-          },
-          "push": {
-            "particles_nb": 4
-          }
-        }
-      },
-      "retina_detect": true
-    });
+    <!-- 优化的JavaScript：模块化设计、安全性修复 -->
+    <script>
+        // ==================== 常量定义 ====================
+        const APP_CONFIG = {
+            TIMING: {
+                BG_LOAD_INITIAL: 300,      // ms
+                CONTENT_SHOW_DELAY: 200,   // ms
+                LOADING_COMPLETE: 800,     // ms
+                IMAGE_TIMEOUT: 5000        // ms
+            },
+            IMAGES: [
+                'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2074&q=80',
+                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+                'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'
+            ],
+            EXAMPLES: [
+                "我想为即将到来的假期规划一个7天的欧洲文化之旅",
+                "推荐一些适合夏季的国内避暑胜地",
+                "帮我规划一个周末的城市探索之旅",
+                "我需要一个预算友好的东南亚海岛游方案"
+            ],
+            CURRENCIES: ['$', '€', '¥', '£']
+        };
 
-    // 移动端菜单切换
-    const mobileMenu = document.getElementById('mobile-menu');
-    const navMenu = document.querySelector('.nav-menu');
-
-    mobileMenu.addEventListener('click', () => {
-      mobileMenu.classList.toggle('active');
-      navMenu.classList.toggle('active');
-    });
-
-    // 懒加载图片 - 保持原有逻辑
-    document.addEventListener("DOMContentLoaded", function () {
-      const images = document.querySelectorAll(".fade-in");
-
-      const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const img = entry.target;
-            const realSrc = img.dataset.src;
-
-            if (realSrc) {
-              img.src = realSrc;
-              img.removeAttribute('data-src');
-
-              // 图片加载完成后添加 loaded 类实现模糊到清晰过渡
-              img.onload = () => {
-                img.classList.add('loaded');
-              };
+        // ==================== 核心应用类 ====================
+        class TripAIApp {
+            constructor() {
+                this.cacheDOM();
+                this.state = { bgLoaded: false };
             }
 
-            observer.unobserve(img);
-          }
+            // 缓存DOM元素
+            cacheDOM() {
+                this.DOM = {
+                    mainContainer: document.getElementById('mainContainer'),
+                    loadingIndicator: document.getElementById('bgLoadingIndicator'),
+                    contentArea: document.getElementById('contentArea'),
+                    navbar: document.getElementById('navbar'),
+                    loadingSkeleton: document.getElementById('loadingSkeleton'),
+                    siteFooter: document.getElementById('siteFooter'),
+                    planBtn: document.getElementById('planBtn'),
+                    travelInput: document.getElementById('travelInput'),
+                    actionButtons: document.querySelectorAll('.action-button'),
+                    navItems: document.querySelectorAll('.nav-item'),
+                    voiceBtn: document.querySelector('.icon-btn[title="语音输入"]')
+                };
+            }
+
+            // 初始化应用
+            async init() {
+                await this.loadBackground();
+                this.setupEventListeners();
+            }
+
+            // 预加载图片（带超时）
+            preloadImage(url, timeout = APP_CONFIG.TIMING.IMAGE_TIMEOUT) {
+                return Promise.race([
+                    new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => resolve(url);
+                        img.onerror = () => reject(new Error(`Image load failed: ${url}`));
+                        img.src = url;
+                    }),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Image load timeout')), timeout)
+                    )
+                ]);
+            }
+
+            // 加载背景图片
+            async loadBackground() {
+                try {
+                    const imageUrl = await this.preloadImage(APP_CONFIG.IMAGES[0]);
+                    this.applyBackground(imageUrl);
+                } catch (error) {
+                    console.warn('主图片加载失败:', error);
+                    try {
+                        const backupUrl = await this.preloadImage(APP_CONFIG.IMAGES[1]);
+                        this.applyBackground(backupUrl);
+                    } catch (backupError) {
+                        console.warn('备用图片加载失败:', backupError);
+                        this.applyFallbackBackground();
+                    }
+                }
+            }
+
+            // 应用背景图片
+            applyBackground(imageUrl) {
+                this.DOM.loadingIndicator.style.width = '70%';
+                this.DOM.mainContainer.style.setProperty('--bg-image-url', `url(${imageUrl})`);
+
+                setTimeout(() => {
+                    this.DOM.loadingIndicator.style.width = '100%';
+                    this.DOM.mainContainer.classList.add('bg-loaded', 'bg-fade-in');
+
+                    this.hideLoadingSkeleton();
+                    this.showContent();
+                    this.hideLoadingIndicator();
+                }, APP_CONFIG.TIMING.BG_LOAD_INITIAL);
+            }
+
+            // 应用降级背景（纯色渐变）
+            applyFallbackBackground() {
+                this.DOM.loadingIndicator.style.width = '100%';
+                this.DOM.mainContainer.style.background = 'linear-gradient(135deg, #0a192f 0%, #1a3a5f 50%, #2c5282 100%)';
+
+                this.hideLoadingSkeleton();
+                setTimeout(() => this.showContent(), APP_CONFIG.TIMING.CONTENT_SHOW_DELAY);
+                this.hideLoadingIndicator();
+            }
+
+            // 隐藏加载骨架屏
+            hideLoadingSkeleton() {
+                this.DOM.loadingSkeleton.style.opacity = '0';
+                setTimeout(() => {
+                    this.DOM.loadingSkeleton.style.display = 'none';
+                }, 500);
+            }
+
+            // 显示内容
+            showContent() {
+                setTimeout(() => {
+                    this.DOM.navbar.classList.add('visible');
+                    this.DOM.navbar.style.opacity = '1';
+                    this.DOM.contentArea.classList.add('visible');
+                    this.DOM.contentArea.style.opacity = '1';
+                    this.DOM.siteFooter.classList.add('visible');
+                }, APP_CONFIG.TIMING.CONTENT_SHOW_DELAY);
+            }
+
+            // 隐藏加载指示器
+            hideLoadingIndicator() {
+                setTimeout(() => {
+                    this.DOM.loadingIndicator.style.opacity = '0';
+                    setTimeout(() => {
+                        this.DOM.loadingIndicator.style.display = 'none';
+                    }, 500);
+                }, APP_CONFIG.TIMING.LOADING_COMPLETE);
+            }
+
+            // 设置事件监听器
+            setupEventListeners() {
+                // 计划按钮
+                this.DOM.planBtn.addEventListener('click', () => this.handlePlanClick());
+
+                // 输入框回车键
+                this.DOM.travelInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.DOM.planBtn.click();
+                });
+
+                // 示例按钮
+                this.DOM.actionButtons.forEach((btn, idx) => {
+                    btn.addEventListener('click', () => this.fillExample(idx));
+                });
+
+                // 导航项
+                const currencyBtn = Array.from(this.DOM.navItems).find(btn => btn.dataset.toggle === 'currency');
+                const tempBtn = Array.from(this.DOM.navItems).find(btn => btn.dataset.toggle === 'temperature');
+
+                if (currencyBtn) {
+                    currencyBtn.addEventListener('click', () => this.toggleCurrency(currencyBtn));
+                }
+                if (tempBtn) {
+                    tempBtn.addEventListener('click', () => this.toggleTemperature(tempBtn));
+                }
+
+                // 语音输入
+                if (this.DOM.voiceBtn) {
+                    this.DOM.voiceBtn.addEventListener('click', () => this.handleVoiceInput());
+                }
+            }
+
+            // 处理计划按钮点击【修复XSS】
+            handlePlanClick() {
+                const inputValue = this.DOM.travelInput.value.trim();
+                if (!inputValue) {
+                    this.DOM.travelInput.focus();
+                    this.DOM.travelInput.placeholder = "请先描述一下您的旅行需求...";
+                    return;
+                }
+
+                // 禁用按钮，更新文本（安全地）
+                this.DOM.planBtn.disabled = true;
+                const originalText = this.DOM.planBtn.textContent;
+                this.DOM.planBtn.textContent = '正在规划中...';
+
+                setTimeout(() => {
+                    // 安全显示：转义用户输入
+                    const message = `正在为您规划：\n"${this.escapeHtml(inputValue)}"\n\nAI正在为您生成个性化旅行方案...`;
+                    alert(message);
+
+                    this.DOM.planBtn.textContent = originalText;
+                    this.DOM.planBtn.disabled = false;
+                    this.DOM.travelInput.value = '';
+                }, 1500);
+            }
+
+            // 填充示例文本
+            fillExample(index) {
+                if (index < APP_CONFIG.EXAMPLES.length) {
+                    this.DOM.travelInput.value = APP_CONFIG.EXAMPLES[index];
+                    this.DOM.travelInput.focus();
+                }
+            }
+
+            // 切换货币
+            toggleCurrency(btn) {
+                const currentCurrency = btn.textContent;
+                const currentIdx = APP_CONFIG.CURRENCIES.indexOf(currentCurrency);
+                const nextIdx = (currentIdx + 1) % APP_CONFIG.CURRENCIES.length;
+                btn.textContent = APP_CONFIG.CURRENCIES[nextIdx];
+            }
+
+            // 切换温度单位
+            toggleTemperature(btn) {
+                btn.textContent = btn.textContent === '°F' ? '°C' : '°F';
+            }
+
+            // 处理语音输入
+            handleVoiceInput() {
+                alert("语音输入功能需要浏览器权限，请在弹出窗口中允许麦克风访问。");
+            }
+
+            // 安全转义HTML【防XSS】
+            escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            }
+        }
+
+        // ==================== 应用初始化 ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            new TripAIApp().init();
         });
-      }, {
-        rootMargin: '50px 0px',
-        threshold: 0.01
-      });
-
-      images.forEach(img => {
-        imageObserver.observe(img);
-      });
-    });
-  </script>
-
+    </script>
 </body>
 </html>
